@@ -10,6 +10,7 @@ import { basename, extname } from 'path';
 import { UploadDestination } from '@/const/upload-destination';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
+import { DailySummary } from './entity/daily-summary.entity';
 
 @ApiTags('attendance')
 @Controller('attendance')
@@ -20,19 +21,38 @@ export class AttendanceController {
 
 	@Get()
   @ApiOperation({ summary: 'All attendances for current user' })
+	@ApiQuery({ name: 'date', description: 'Select a specific date' })
+	@ApiQuery({ name: 'startDate', description: 'Select date from' })
+	@ApiQuery({ name: 'endDate', description: 'Select date to' })
+  @ApiOkResponse({ type: [DailySummary] })
 	@PaginatedRoute()
-  @ApiOkResponse({ type: [Attendance] })
-  async getAll(@Request() req: { user: User }) {
-		return await this.service.getAll(req.user.id);
+  async getAll(
+		@Request() req: { user: User },
+		@Query('startDate') startDate: undefined | string,
+		@Query('endDate') endDate: undefined | string,
+		@Query('date') date: undefined | string,
+	) {
+		return await this.service.getAll(req.user.id, date || startDate, endDate);
   }
 
 	@Get('state')
   @ApiOperation({ summary: 'Current user state' })
-  @ApiOkResponse({ example: { status: AttendType.IN } })
+  @ApiOkResponse({  })
   async getState(@Request() req: { user: User }) {
 		return {
 			status: await this.service.getCurrentState(req.user.id)
 		};
+  }
+	
+	@Get('weekly')
+  @ApiOperation({ summary: 'Weekly attendance' })
+	@ApiQuery({ name: 'summaries', type: Boolean, description: 'Wether to send everday record or not' })
+  @ApiOkResponse({ type: DailySummary })
+  async getWeeklySummary(
+		@Request() req: { user: User },
+		@Query('summaries') summaries: string
+	) {
+		return await this.service.getWeeklyAttendance(req.user.id, summaries === 'true');
   }
 
 	@Post('attachment')

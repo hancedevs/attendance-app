@@ -2,7 +2,7 @@ import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { Body, Controller, Get, Param, Patch, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { Attendance } from '@/attendance/entity/attendance.entity';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
@@ -19,12 +19,18 @@ export class AdminController {
 
 	@Get("attendance/:username")
 	@ApiOperation({ summary: 'Attendance of a user' })
+	@ApiQuery({ name: 'date', description: 'Select a specific date' })
+	@ApiQuery({ name: 'startDate', description: 'Select date from' })
+	@ApiQuery({ name: 'endDate', description: 'Select date to' })
 	@ApiOkResponse({ type: [Attendance] })
 	@PaginatedRoute()
 	async findUserAttendance(
-		@Param('username') username: string
+		@Param('username') username: string,
+		@Query('startDate') startDate: undefined | string,
+		@Query('endDate') endDate: undefined | string,
+		@Query('date') date: undefined | string,
 	){
-		return await this.service.getAttendance(username)
+		return await this.service.getAttendance(username, date || startDate, endDate);
 	}
 
 	@Get('requests')
