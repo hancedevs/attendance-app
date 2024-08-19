@@ -1,0 +1,95 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  MANAGEMENT
+  MARKETING
+  DEVELOPMENT
+	SALES
+	RND
+}
+
+enum AttendType {
+  IN
+  OUT
+  PAUSE
+  RESUME
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  name  String @db.VarChar(40)
+  email String @unique
+
+  username String @unique
+  password String
+
+  role UserRole
+
+  Attendance   Attendance[]
+  StaffRequest StaffRequest[]
+  Admin Admin[]
+}
+
+model Attachment {
+  id Int @id @default(autoincrement())
+
+  name     String
+  filename String
+
+  text String?
+
+  Attendance Attendance[]
+  StaffRequest StaffRequest[]
+}
+
+model Attendance {
+  id Int @id @default(autoincrement())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  date   DateTime   @default(now())
+  status AttendType
+
+  attachment   Attachment? @relation(fields: [attachmentId], references: [id])
+  attachmentId Int?
+}
+
+enum StaffRequestStatus {
+  APPROVED
+  PENDING
+  REJECTED
+  CONSULTATION_REQURED
+}
+
+model StaffRequest {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  title   String? @db.VarChar(40)
+  content String?
+
+  status StaffRequestStatus @default(PENDING)
+
+  attachment   Attachment? @relation(fields: [attachmentId], references: [id])
+  attachmentId Int?
+}
+
+model Admin {
+  id Int @id @default(autoincrement())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
