@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthLoginDto } from './dto/auth-login.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -14,7 +15,7 @@ export class AuthController {
   @ApiBody({
     type: AuthLoginDto,
   })
-  @ApiOkResponse({ type: CreateUserDto })
+  @ApiOkResponse({ type: AuthResponseDto })
   async login(@Body() loginDto: AuthLoginDto) {
     return this.authService.login(loginDto);
   }
