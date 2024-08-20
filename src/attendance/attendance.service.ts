@@ -1,7 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Attachment, Attendance, AttendType } from '@prisma/client';
-import { subDays, startOfWeek, endOfWeek } from 'date-fns'; // Assumes you have date-fns for date manipulation
+import { subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'; // Assumes you have date-fns for date manipulation
 
 @Injectable()
 export class AttendanceService {
@@ -26,8 +26,6 @@ export class AttendanceService {
 
 		attandances.forEach((entry) => {
 			if (entry.status === AttendType.IN || entry.status === AttendType.RESUME) {
-				currentPair.push(entry.date);
-			} else if (entry.status === AttendType.PAUSE || entry.status === AttendType.OUT) {
 				if (currentPair.length > 0) {
 					currentPair.unshift(entry.date);
 					hours.push([...currentPair]);
@@ -35,10 +33,12 @@ export class AttendanceService {
 					totalMilliseconds += currentPair[1] - currentPair[0];
 					currentPair = [];
 				}
+			} else if (entry.status === AttendType.PAUSE || entry.status === AttendType.OUT) {
+				currentPair.push(entry.date);
 			}
 		});
 
-		const totalSeconds = Math.floor(totalMilliseconds + 200000 / 1000);
+		const totalSeconds = Math.floor(totalMilliseconds / 1000);
 		const minutes = Math.floor(totalSeconds / 60);
 		const seconds = totalSeconds % 60;
 		const hoursValue = Math.floor(minutes / 60);
@@ -149,16 +149,18 @@ export class AttendanceService {
 		}));
 	}
 
-	async getWeeklyAttendance(userId: number, includeDailySummaries = false) {
-		const startOfWeekDate = startOfWeek(new Date(), { weekStartsOn: 1 }); // Assuming week starts on Monday
-		const endOfWeekDate = endOfWeek(new Date(), { weekStartsOn: 1 });
-
-		const weeklyAttendances = await this.prisma.attendance.findMany({
+	async getAttendanceSummaryFrom(
+		userId: number,
+		startDate: Date,
+		endDate: Date,
+		includeDailySummaries = false
+	){
+		const attendances = await this.prisma.attendance.findMany({
 			where: {
 				userId,
 				date: {
-					gte: startOfWeekDate,
-					lt: endOfWeekDate,
+					gte: startDate,
+					lt: endDate,
 				}
 			},
 			orderBy: {
@@ -166,20 +168,45 @@ export class AttendanceService {
 			}
 		});
 
-		const dailySummaries = this.fixAttendances(weeklyAttendances);
+		const dailySummaries = this.fixAttendances(attendances);
 
-		const totalWeeklySeconds = dailySummaries.reduce((acc, day) => acc + day.totalTime, 0);
-		const totalWeeklyMinutes = Math.floor(totalWeeklySeconds / 60);
-		const weeklySecondsRemainder = totalWeeklySeconds % 60;
-		const totalWeeklyHours = Math.floor(totalWeeklyMinutes / 60);
-		const weeklyMinutesRemainder = totalWeeklyMinutes % 60;
+		const totalDurationSeconds = dailySummaries.reduce((acc, day) => acc + day.totalTime, 0);
+		const totalDurationMinutes = Math.floor(totalDurationSeconds / 60);
+		const durationSecondsRemainder = totalDurationSeconds % 60;
+		const totalDurationHours = Math.floor(totalDurationMinutes / 60);
+		const durationMinutesRemainder = totalDurationMinutes % 60;
 
 		return {
 			dailySummaries: includeDailySummaries ? dailySummaries : [],
-			totalWeeklyTime: totalWeeklySeconds,
-			totalWeeklyMinutes: `${weeklyMinutesRemainder.toString().padStart(2, '0')}:${weeklySecondsRemainder.toString().padStart(2, '0')}`, // MM:SS
-			totalWeeklyHours: `${totalWeeklyHours.toString().padStart(2, '0')}:${weeklyMinutesRemainder.toString().padStart(2, '0')}` // HH:MM
+			totalDays: dailySummaries.length,
+			totalTime: totalDurationSeconds,
+			totalMinutes: `${durationMinutesRemainder.toString().padStart(2, '0')}:${durationSecondsRemainder.toString().padStart(2, '0')}`, // MM:SS
+			totalHours: `${totalDurationHours.toString().padStart(2, '0')}:${durationMinutesRemainder.toString().padStart(2, '0')}` // HH:MM
 		};
+	}
+
+	async getWeeklyAttendance(userId: number, includeDailySummaries = false) {
+		const startOfWeekDate = startOfWeek(new Date(), { weekStartsOn: 1 }); // Assuming week starts on Monday
+		const endOfWeekDate = endOfWeek(new Date(), { weekStartsOn: 1 });
+
+		return await this.getAttendanceSummaryFrom(
+			userId,
+			startOfWeekDate,
+			endOfWeekDate,
+			includeDailySummaries
+		);
+	}
+
+	async getMonthlyAttendance(userId: number, includeDailySummaries = false){
+		const startOfMonthDate = startOfMonth(new Date());
+    const endOfMonthDate = endOfMonth(new Date());
+
+		return await this.getAttendanceSummaryFrom(
+			userId,
+			startOfMonthDate,
+			endOfMonthDate,
+			includeDailySummaries
+		);
 	}
 
 	async attachment(

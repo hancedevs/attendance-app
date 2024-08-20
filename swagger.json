@@ -1,0 +1,886 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/file/{filename}": {
+      "get": {
+        "operationId": "FileController_getAttachment",
+        "summary": "Get an uploaded file by it's name",
+        "parameters": [
+          {
+            "name": "filename",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File content"
+          }
+        },
+        "tags": [
+          "file"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "summary": "Login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "summary": "Register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/user": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "summary": "Get current user info",
+        "description": "The logged in user info.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "user"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "summary": "Change current user info",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "The fields to change",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The changed user info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/attendance": {
+      "get": {
+        "operationId": "AttendanceController_getAll",
+        "summary": "All attendances for current user",
+        "parameters": [
+          {
+            "name": "startDate",
+            "required": true,
+            "in": "query",
+            "description": "Select date from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": true,
+            "in": "query",
+            "description": "Select date to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Select a specific date",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DailySummary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      },
+      "post": {
+        "operationId": "AttendanceController_create",
+        "summary": "Change the current status",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "description": "The current status",
+            "schema": {
+              "enum": [
+                "IN",
+                "OUT",
+                "PAUSE",
+                "RESUME"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attendance"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
+    "/attendance/state": {
+      "get": {
+        "operationId": "AttendanceController_getState",
+        "summary": "Current user state",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
+    "/attendance/today": {
+      "get": {
+        "operationId": "AttendanceController_getDailySummary",
+        "summary": "Hours attended today",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailySummary"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
+    "/attendance/weekly": {
+      "get": {
+        "operationId": "AttendanceController_getWeeklySummary",
+        "summary": "Weekly attendance",
+        "parameters": [
+          {
+            "name": "summaries",
+            "required": true,
+            "in": "query",
+            "description": "Wether to send everday record or not",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodSummary"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
+    "/attendance/monthly": {
+      "get": {
+        "operationId": "AttendanceController_getMonthlySummary",
+        "summary": "Monthly attendance",
+        "parameters": [
+          {
+            "name": "summaries",
+            "required": true,
+            "in": "query",
+            "description": "Wether to send everday record or not",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodSummary"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
+    "/attendance/attachment": {
+      "post": {
+        "operationId": "AttendanceController_uploadAttachment",
+        "summary": "Attach document as proof for absence",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attendance"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
+    "/requests": {
+      "post": {
+        "operationId": "RequestsController_createRequest",
+        "summary": "Create a request to management",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "requests"
+        ]
+      },
+      "get": {
+        "operationId": "RequestsController_getAll",
+        "summary": "Get all requests",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StaffRequest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/requests/{id}": {
+      "delete": {
+        "operationId": "RequestsController_delete",
+        "summary": "Delete a request",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/admin/attendance/{username}": {
+      "get": {
+        "operationId": "AdminController_findUserAttendance",
+        "summary": "Attendance of a user",
+        "parameters": [
+          {
+            "name": "username",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": true,
+            "in": "query",
+            "description": "Select date from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": true,
+            "in": "query",
+            "description": "Select date to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Select a specific date",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Attendance"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/requests": {
+      "get": {
+        "operationId": "AdminController_getAllReuests",
+        "summary": "All requests from all users",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "username",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StaffRequest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/requests/{id}": {
+      "get": {
+        "operationId": "AdminController_getRequest",
+        "summary": "Get a specific request",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/requests/{id}/status": {
+      "patch": {
+        "operationId": "AdminController_changeStatus",
+        "summary": "Change request status",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRequestStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Attendance API",
+    "description": "API documentation for attendance backend",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "nestjs",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "AuthLoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "MANAGEMENT",
+              "MARKETING",
+              "DEVELOPMENT",
+              "SALES",
+              "RND"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "username",
+          "email",
+          "password",
+          "role"
+        ]
+      },
+      "DailySummary": {
+        "type": "object",
+        "properties": {
+          "totalTime": {
+            "type": "number"
+          },
+          "totalHoursNumber": {
+            "type": "number"
+          },
+          "totalMinutes": {
+            "type": "string"
+          },
+          "totalHours": {
+            "type": "string"
+          },
+          "hours": {
+            "example": [
+              [
+                "9:25:05 AM",
+                "9:28:06 AM"
+              ]
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attandances": {
+            "example": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "date": {
+            "type": "string",
+            "example": "Mon Aug 19 2024"
+          },
+          "time": {
+            "type": "object",
+            "example": {
+              "in": 1724058582845,
+              "out": 1724058593354
+            }
+          }
+        },
+        "required": [
+          "totalTime",
+          "totalHoursNumber",
+          "totalMinutes",
+          "totalHours",
+          "hours",
+          "attandances",
+          "date",
+          "time"
+        ]
+      },
+      "PeriodSummary": {
+        "type": "object",
+        "properties": {
+          "dailySummaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailySummary"
+            }
+          },
+          "totalDays": {
+            "type": "number"
+          },
+          "totalTime": {
+            "type": "number"
+          },
+          "totalMinutes": {
+            "type": "string"
+          },
+          "totalHours": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dailySummaries",
+          "totalDays",
+          "totalTime",
+          "totalMinutes",
+          "totalHours"
+        ]
+      },
+      "Attendance": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "PAUSE",
+              "RESUME"
+            ]
+          },
+          "date": {
+            "type": "number"
+          },
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "userId",
+          "status",
+          "date",
+          "id"
+        ]
+      },
+      "CreateRequestDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "content"
+        ]
+      },
+      "StaffRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "title",
+          "content",
+          "userId"
+        ]
+      },
+      "UpdateRequestStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PENDING",
+              "REJECTED",
+              "CONSULTATION_REQURED"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
+    }
+  }
+}

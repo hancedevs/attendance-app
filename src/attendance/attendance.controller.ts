@@ -11,6 +11,7 @@ import { UploadDestination } from '@/const/upload-destination';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
 import { DailySummary } from './entity/daily-summary.entity';
+import { PeriodSummary } from './entity/period-summary.entity';
 
 @ApiTags('attendance')
 @Controller('attendance')
@@ -43,16 +44,49 @@ export class AttendanceController {
 			status: await this.service.getCurrentState(req.user.id)
 		};
   }
+
+	@Get('today')
+  @ApiOperation({ summary: 'Hours attended today' })
+  @ApiOkResponse({ type: DailySummary })
+  async getDailySummary(
+		@Request() req: { user: User }
+	) {
+		const today = new Date().toDateString();
+		return (await this.service.getAll(req.user.id, today))[0] || {
+			date: today,
+			time: {
+				in: 0,
+				out: 0
+			},
+			attandances: [],
+			hours: [],
+			totalTime: 0,
+			totalMinutes: '00:00',
+			totalHours: '00:00',
+			totalHoursNumber: 0
+		};
+  }
 	
 	@Get('weekly')
   @ApiOperation({ summary: 'Weekly attendance' })
 	@ApiQuery({ name: 'summaries', type: Boolean, description: 'Wether to send everday record or not' })
-  @ApiOkResponse({ type: DailySummary })
+  @ApiOkResponse({ type: PeriodSummary })
   async getWeeklySummary(
 		@Request() req: { user: User },
 		@Query('summaries') summaries: string
 	) {
 		return await this.service.getWeeklyAttendance(req.user.id, summaries === 'true');
+  }
+	
+	@Get('monthly')
+  @ApiOperation({ summary: 'Monthly attendance' })
+	@ApiQuery({ name: 'summaries', type: Boolean, description: 'Wether to send everday record or not' })
+  @ApiOkResponse({ type: PeriodSummary })
+  async getMonthlySummary(
+		@Request() req: { user: User },
+		@Query('summaries') summaries: string
+	) {
+		return await this.service.getMonthlyAttendance(req.user.id, summaries === 'true');
   }
 
 	@Post('attachment')

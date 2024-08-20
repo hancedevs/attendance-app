@@ -1,6 +1,7 @@
 import { INestApplication } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { writeFileSync } from "fs";
 
 export function docGen(app: INestApplication){
 	const config = new DocumentBuilder()
@@ -26,5 +27,7 @@ export function docGen(app: INestApplication){
       }
     });
   });
+
+  writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
   SwaggerModule.setup('api-docs', app, document);
 }

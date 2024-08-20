@@ -11,9 +11,10 @@ import { FileModule } from './file/file.module';
 import { RequestsModule } from './requests/requests.module';
 import { AdminModule } from './admin/admin.module';
 import { EventsModule } from './events/events.module';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, AttendanceModule, PrismaModule, FileModule, RequestsModule, AdminModule, EventsModule],
+  imports: [AuthModule, UsersModule, AttendanceModule, PrismaModule, FileModule, RequestsModule, AdminModule, EventsModule, ChatsModule],
   providers: [JwtStrategy, FileService],
   controllers: [FileController]
 })
