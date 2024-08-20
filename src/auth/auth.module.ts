@@ -13,7 +13,7 @@ import { PrismaService } from '@/prisma/prisma.service';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || '894#pbun08q7%34p9h8r*q34',
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '12d' },
     }),
     // PassportModule.register({ defaultStrategy: 'jwt' }),

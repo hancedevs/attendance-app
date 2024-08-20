@@ -1,24 +1,55 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { Test } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';
+import { io, Socket } from 'socket.io-client';
 
-describe('AppController (e2e)', () => {
+describe('EventsGateway', () => {
   let app: INestApplication;
+  let socket: Socket;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    app = moduleRef.createNestApplication();
+    await app.listen(3000);
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  beforeEach(done => {
+    socket = io('http://localhost:3000');
+    socket.on('connect', () => {
+      done();
+    });
+  });
+
+  describe('findAll', () => {
+    it('should receive 3 numbers', done => {
+      let eventCount = 1;
+      socket.emit('events', { test: 'test' });
+      socket.on('events', data => {
+        expect(data).toBe(eventCount);
+        if (++eventCount > 3) {
+          done();
+        }
+      });
+    });
+  });
+
+  describe('identity', () => {
+    it('should return the same number has what was sent', done => {
+      socket.emit('identity', 0, response => {
+        expect(response).toBe(0);
+        done();
+      });
+    });
+  });
+
+  afterEach(() => {
+    socket.disconnect();
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 });
