@@ -25,6 +25,30 @@
         ]
       }
     },
+    "/file/stats/{filename}": {
+      "get": {
+        "operationId": "FileController_getAttachmentInfo",
+        "summary": "Get info of an uploaded file by it's name",
+        "parameters": [
+          {
+            "name": "filename",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File stats"
+          }
+        },
+        "tags": [
+          "file"
+        ]
+      }
+    },
     "/auth/login": {
       "post": {
         "operationId": "AuthController_login",
@@ -133,6 +157,69 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateUserDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/user/{username}": {
+      "get": {
+        "operationId": "UsersController_getUser",
+        "summary": "Information about a user via username",
+        "parameters": [
+          {
+            "name": "username",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/user/{username}/online": {
+      "get": {
+        "operationId": "UsersController_checkOnline",
+        "summary": "Check if a user is online via username",
+        "parameters": [
+          {
+            "name": "username",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "username": "string",
+                  "online": true
                 }
               }
             }

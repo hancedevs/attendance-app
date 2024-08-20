@@ -13,9 +13,10 @@ import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { WSJwtAuthGuard } from './ws-jwt.guard';
 import { JwtStrategy } from '@/auth/jwt.strategy';
-import { verify } from 'jsonwebtoken';
-import { JwtPayloadInterface } from '@/auth/jwt-payload.interface';
 import { EventsService } from './events.service';
+import { ChatsGateway } from '@/chats/chats.gateway';
+import { ChatsService } from '@/chats/chats.service';
+import { User } from '@prisma/client';
 
 @WebSocketGateway({
   cors: {
@@ -23,38 +24,34 @@ import { EventsService } from './events.service';
   },
 })
 // @UseGuards(WSJwtAuthGuard)
-export class EventsGateway {
+export class EventsGateway extends ChatsGateway {
   @WebSocketServer()
   server: Server;
 
   constructor(
-    private jwtService: JwtStrategy,
-    private service: EventsService
-  ){}
+    private service: EventsService,
+    public chats: ChatsService,
+  ){
+    super(chats);
+  }
 
   async handleConnection(@ConnectedSocket() client: Socket) {
-    const { token } = client.handshake.query;
-    
-    if(token){
-      verify(token as string, process.env.JWT_SECRET, async (err, payload: JwtPayloadInterface) => {
-        if(err){
-          return client.disconnect();
-        }
-        let user = await this.jwtService.validate(payload);
-        if(!user){
-          return client.disconnect();
-        }
-        client.data.user = user;
-      });
-    } else {
-      client.disconnect();
+    const verified = await this.service.verifyClient(client);
+    if(verified){
+      this.service.addOnline(client.data.user.username);
+      this.server.emit('user:online', client.data.user.username);
     }
+  }
+
+  async handleDisconnect(@ConnectedSocket() client: Socket){
+    this.server.emit('user:offline', client.data.user.username);
+    this.service.removeOnline(client.data.user.username);
   }
   
   @SubscribeMessage('whoami')
-  findAll(
+  whoAmI(
     @ConnectedSocket() client: Socket,
-  ): Observable<WsResponse<number>> {
+  ): Observable<WsResponse<Partial<User>>> {
     return client.data.user;
   }
 

@@ -36,7 +36,7 @@ export class AuthService {
     };
     const token = this.jwtService.sign(payload);
 
-    return { token, role: user.role };
+    return { token, role: user.role, id: user.id };
   }
 
   async register(userDto: CreateUserDto) {

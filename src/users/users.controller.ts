@@ -16,12 +16,16 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole, User } from '@prisma/client';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { EventsService } from '@/events/events.service';
 
 @ApiTags('user')
 @Controller('user')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly eventsService: EventsService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get current user info', description: 'The logged in user info.' })
@@ -39,5 +43,28 @@ export class UsersController {
   update(@Request() req: { user: User }, @Body() updateUserDto: UpdateUserDto) {
 		const {password, ...updatedDto} =  updateUserDto;
     return this.usersService.update(req.user.id, updatedDto);
+  }
+
+  @Get(':username')
+  @ApiOperation({ summary: 'Information about a user via username' })
+  @ApiOkResponse({ type: CreateUserDto })
+  async getUser(
+    @Param('username') username: string
+  ){
+    const {password, ...user} = await this.usersService.findOneByUsername(username);
+    return user;
+  }
+
+
+  @Get(':username/online')
+	@ApiOperation({ summary: 'Check if a user is online via username' })
+  @ApiOkResponse({ example: { username: 'string', online: true } })
+  checkOnline(
+    @Param('username') username: string
+  ){
+    return {
+      username,
+      online: this.eventsService.onlineUsers.includes(username)
+    };
   }
 }

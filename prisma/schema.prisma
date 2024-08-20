@@ -36,6 +36,7 @@ model User {
 
   Attendance   Attendance[]
   StaffRequest StaffRequest[]
+  Message Message[]
   Admin Admin[]
 }
 
@@ -92,4 +93,55 @@ model Admin {
 
   user   User @relation(fields: [userId], references: [id])
   userId Int
+}
+
+enum ConversationType {
+  PRIVATE
+  GROUP
+}
+
+model Conversation {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  members Int[]
+  type ConversationType
+
+  Message Message[]
+  Group Group[]
+}
+
+model Group {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  name String
+  role UserRole?
+  
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
+}
+
+model MessageAttachment {
+  id Int @id @default(autoincrement())
+
+  filename String
+
+  message Message @relation(fields: [messageId], references: [id])
+  messageId Int
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
+  
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  content String
+
+  attachments MessageAttachment[]
 }
