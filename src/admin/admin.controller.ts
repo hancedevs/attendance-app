@@ -33,6 +33,15 @@ export class AdminController {
 		return await this.service.getAttendance(username, date || startDate, endDate);
 	}
 
+	@Get("attachment/:attachmentId")
+	@ApiOperation({ summary: 'Get an attachment.' })
+	@ApiOkResponse({ example: { id: 1, name: "name", filename: "filename", text: "content" } })
+	async findAttendanceAttachment(
+		@Param('attachmentId') attachmentId: string,
+	){
+		return await this.service.getAttachment(+attachmentId);
+	}
+
 	@Get('requests')
 	@ApiOperation({ summary: 'All requests from all users' })
 	@ApiOkResponse({ type: [StaffRequest] })

@@ -1,14 +1,40 @@
 import { UploadDestination } from '@/const/upload-destination';
-import { Controller, Get, NotFoundException, Param, Res } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { createReadStream, existsSync, statfsSync, statSync } from 'fs';
-import { extname, join } from 'path';
+import { basename, extname, join } from 'path';
 import { lookup, types } from 'mime-types';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @ApiTags('file')
 @Controller('file')
 export class FileController {
+
+
+	@Post()
+	@UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: UploadDestination(),
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = extname(file.originalname);
+        const filename = `${file.fieldname}-${uniqueSuffix}${ext}`;
+        cb(null, filename);
+      }
+    }),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // Limit the file size to 5MB
+    },
+  }))
+	async createRequest(
+		@UploadedFile() file: Express.Multer.File,
+	){
+		return {
+			filename: basename(file.path)
+		};
+	}
 
 	@Get(':filename')
 	@ApiOperation({ summary: 'Get an uploaded file by it\'s name' })

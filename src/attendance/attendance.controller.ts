@@ -1,5 +1,5 @@
 import { Body, Controller, Get, NotFoundException, Param, Post, Query, Request, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Attendance } from './entity/attendance.entity';
 import { Attachment, AttendType, User } from '@prisma/client';
 import { AttendanceService } from './attendance.service';
@@ -12,6 +12,8 @@ import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
 import { DailySummary } from './entity/daily-summary.entity';
 import { PeriodSummary } from './entity/period-summary.entity';
+import { CreateAttendanceDto } from './dto/create-attendance.dto';
+import { CreateAttachmentDto } from './dto/create-attachment.dto';
 
 @ApiTags('attendance')
 @Controller('attendance')
@@ -89,31 +91,30 @@ export class AttendanceController {
 		return await this.service.getMonthlyAttendance(req.user.id, summaries === 'true');
   }
 
+	@Get('attachment/:attachmentId')
+	@ApiOperation({ summary: 'Get attachment information' })
+	@ApiParam({ name: 'attachmentId' })
+	@ApiCreatedResponse({ example: { id: 1, name: "name", filename: "filename", text: "content" } })
+	async getAttachment(
+		@Request() req: { user: User },
+		@Param('attachmentId') attachmentId: string
+	) {
+		return await this.service.getAttachment(
+			+attachmentId,
+			req.user.id
+		);
+	}
+
 	@Post('attachment')
 	@ApiOperation({ summary: 'Attach document as proof for absence' })
 	@ApiCreatedResponse({ type: Attendance })
-	@UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: UploadDestination(),
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = extname(file.originalname);
-        const filename = `${file.fieldname}-${uniqueSuffix}${ext}`;
-        cb(null, filename);
-      }
-    }),
-    limits: {
-      fileSize: 5 * 1024 * 1024, // Limit the file size to 5MB
-    },
-  }))
 	async uploadAttachment(
-		@Body() attachment: Partial<Attachment>,
-		@UploadedFile() file: Express.Multer.File,
+		@Body() attachment: CreateAttachmentDto,
 		@Request() req: { user: User }
 	) {
 		return await this.service.attachment(
 			attachment,
-			basename(file.path),
+			attachment.filename,
 			req.user.id
 		);
 	}

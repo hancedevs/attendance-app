@@ -38,24 +38,37 @@ export class AttendanceService {
 			}
 		});
 
+		const checkedIn = attandances.find(attachment => attachment.status == AttendType.IN);
+		const checkedOut = attandances.find(attachment => attachment.status == AttendType.OUT);
+
 		const totalSeconds = Math.floor(totalMilliseconds / 1000);
 		const minutes = Math.floor(totalSeconds / 60);
 		const seconds = totalSeconds % 60;
 		const hoursValue = Math.floor(minutes / 60);
 		const minutesValue = minutes % 60;
 
-		return {
-			date: attandances[0].date.toDateString(),
-			time: {
-				in: attandances.find(attachment => attachment.status == AttendType.IN).date.getTime(),
-				out: attandances.find(attachment => attachment.status == AttendType.OUT).date.getTime()
+		const wasAbsent = checkedOut && !checkedIn;
+
+
+		const date = attandances[0].date.toDateString();
+
+		return wasAbsent ? {
+			date,
+			wasAbsent,
+			absenceAttachment: checkedOut.attachmentId
+		} : {
+			date,
+			time: wasAbsent ? {} : {
+				in: checkedIn?.date.getTime(),
+				out: checkedOut?.date.getTime()
 			},
 			attandances: attandances.map(a => a.id),
 			hours: hours.map(pair => pair.map((date: Date) => date.toLocaleTimeString())),
 			totalTime: totalSeconds, // Total time in seconds
 			totalMinutes: `${minutesValue.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`, // MM:SS
 			totalHours: `${hoursValue.toString().padStart(2, '0')}:${minutesValue.toString().padStart(2, '0')}`, // HH:MM
-			totalHoursNumber: parseFloat(((totalSeconds / 60) / 60).toFixed(2))
+			totalHoursNumber: parseFloat(((totalSeconds / 60) / 60).toFixed(2)),
+			wasAbsent
 		};
 	}
 
@@ -183,6 +196,16 @@ export class AttendanceService {
 			totalMinutes: `${durationMinutesRemainder.toString().padStart(2, '0')}:${durationSecondsRemainder.toString().padStart(2, '0')}`, // MM:SS
 			totalHours: `${totalDurationHours.toString().padStart(2, '0')}:${durationMinutesRemainder.toString().padStart(2, '0')}` // HH:MM
 		};
+	}
+
+	async getAttachment(attachmentId: number, userId?: number){
+		return await this.prisma.attachment.findUnique({
+			where: { id: attachmentId, Attendance: userId ? {
+				some: {
+					userId
+				}
+			} : undefined, }
+		});
 	}
 
 	async getWeeklyAttendance(userId: number, includeDailySummaries = false) {

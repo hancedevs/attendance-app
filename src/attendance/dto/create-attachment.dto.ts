@@ -3,16 +3,17 @@ import { Attendance, AttendType } from "@prisma/client";
 import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 
 
-export class CreateAttendanceDto implements Partial<Attendance> {
+export class CreateAttachmentDto {
 
 	@ApiProperty()
-	@IsNumber()
+	@IsString()
 	@IsOptional()
-	userId: number;
+	text: string;
 
-	@ApiProperty({ enum: AttendType })
-	@IsEnum(AttendType)
-	status: AttendType;
+	@ApiProperty()
+	@IsString()
+	@IsOptional()
+	name: string;
 
 	@ApiProperty()
 	@IsOptional()

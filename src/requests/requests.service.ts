@@ -12,6 +12,16 @@ export class RequestsService {
 			data: data as StaffRequest
 		});
 	}
+	
+	async getAttachment(attachmentId: number, userId?: number){
+		return await this.prisma.attachment.findUnique({
+			where: { id: attachmentId, Attendance: userId ? {
+				some: {
+					userId
+				}
+			} : undefined, }
+		});
+	}
 
 	async attachment(filename: string, attachmentData: Partial<Attachment>){
 		return await this.prisma.attachment.create({

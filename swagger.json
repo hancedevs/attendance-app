@@ -1,6 +1,20 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/file": {
+      "post": {
+        "operationId": "FileController_createRequest",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "file"
+        ]
+      }
+    },
     "/file/{filename}": {
       "get": {
         "operationId": "FileController_getAttachment",
@@ -460,11 +474,55 @@
         ]
       }
     },
+    "/attendance/attachment/{attachmentId}": {
+      "get": {
+        "operationId": "AttendanceController_getAttachment",
+        "summary": "Get attachment information",
+        "parameters": [
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 1,
+                  "name": "name",
+                  "filename": "filename",
+                  "text": "content"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
     "/attendance/attachment": {
       "post": {
         "operationId": "AttendanceController_uploadAttachment",
         "summary": "Attach document as proof for absence",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAttachmentDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "",
@@ -536,6 +594,40 @@
                   "items": {
                     "$ref": "#/components/schemas/StaffRequest"
                   }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/requests/attachment/{attachmentId}": {
+      "get": {
+        "operationId": "RequestsController_getAttachment",
+        "summary": "Get attachment information",
+        "parameters": [
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 1,
+                  "name": "name",
+                  "filename": "filename",
+                  "text": "content"
                 }
               }
             }
@@ -628,6 +720,40 @@
                   "items": {
                     "$ref": "#/components/schemas/Attendance"
                   }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/attachment/{attachmentId}": {
+      "get": {
+        "operationId": "AdminController_findAttendanceAttachment",
+        "summary": "Get an attachment.",
+        "parameters": [
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 1,
+                  "name": "name",
+                  "filename": "filename",
+                  "text": "content"
                 }
               }
             }
@@ -979,6 +1105,25 @@
           "totalHours"
         ]
       },
+      "CreateAttachmentDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "name",
+          "filename"
+        ]
+      },
       "Attendance": {
         "type": "object",
         "properties": {
@@ -994,6 +1139,9 @@
               "RESUME"
             ]
           },
+          "filename": {
+            "type": "string"
+          },
           "date": {
             "type": "number"
           },
@@ -1004,6 +1152,7 @@
         "required": [
           "userId",
           "status",
+          "filename",
           "date",
           "id"
         ]
@@ -1016,11 +1165,15 @@
           },
           "content": {
             "type": "string"
+          },
+          "filename": {
+            "type": "string"
           }
         },
         "required": [
           "title",
-          "content"
+          "content",
+          "filename"
         ]
       },
       "StaffRequest": {
@@ -1032,6 +1185,9 @@
           "content": {
             "type": "string"
           },
+          "filename": {
+            "type": "string"
+          },
           "userId": {
             "type": "number"
           }
@@ -1039,6 +1195,7 @@
         "required": [
           "title",
           "content",
+          "filename",
           "userId"
         ]
       },

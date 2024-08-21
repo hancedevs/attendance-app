@@ -14,6 +14,9 @@ export class AdminService {
 		private requests: RequestsService,
 	) { }
 
+	async getAttachment(id: number){
+		return await this.attendance.getAttachment(id);
+	}
 
 	async getAttendance(username: string, startDate?: string, endDate?: string) {
 		const user = await this.users.findOneByUsername(username);
