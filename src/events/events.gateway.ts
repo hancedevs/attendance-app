@@ -17,6 +17,7 @@ import { EventsService } from './events.service';
 import { ChatsGateway } from '@/chats/chats.gateway';
 import { ChatsService } from '@/chats/chats.service';
 import { User } from '@prisma/client';
+import { UsersService } from '@/users/users.service';
 
 @WebSocketGateway({
   cors: {
@@ -31,8 +32,9 @@ export class EventsGateway extends ChatsGateway {
   constructor(
     private service: EventsService,
     public chats: ChatsService,
+    public users: UsersService,
   ){
-    super(chats);
+    super(chats, users);
   }
 
   async handleConnection(@ConnectedSocket() client: Socket) {
@@ -40,6 +42,7 @@ export class EventsGateway extends ChatsGateway {
     if(verified){
       this.service.addOnline(client.data.user.username);
       this.server.emit('user:online', client.data.user.username);
+      client.join(client.data.user.id.toString()); 
     }
   }
 

@@ -6,10 +6,11 @@ import { ChatsGateway } from '@/chats/chats.gateway';
 import { ChatsService } from '@/chats/chats.service';
 import { ChatsModule } from '@/chats/chats.module';
 import { EventsController } from './events.controller';
+import { UsersService } from '@/users/users.service';
 
 @Module({
   imports: [ChatsModule],
-  providers: [EventsGateway, JwtStrategy, EventsService, ChatsGateway, ChatsService],
+  providers: [EventsGateway, JwtStrategy, EventsService, UsersService, ChatsGateway, ChatsService],
   controllers: [EventsController],
   exports: [EventsService]
 })
