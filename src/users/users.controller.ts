@@ -25,6 +25,7 @@ import { Response as ResponseType } from 'express';
 
 @ApiTags('user')
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -32,7 +33,6 @@ export class UsersController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get current user info', description: 'The logged in user info.' })
   @ApiOkResponse({ type: CreateUserDto })
   async findOne(@Request() req: { user: User }) {
