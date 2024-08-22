@@ -12,9 +12,13 @@ import { RequestsModule } from './requests/requests.module';
 import { AdminModule } from './admin/admin.module';
 import { EventsModule } from './events/events.module';
 import { ChatsModule } from './chats/chats.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { CompanyModule } from './company/company.module';
+import { IndustryModule } from './industry/industry.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, AttendanceModule, PrismaModule, FileModule, RequestsModule, AdminModule, EventsModule, ChatsModule],
+  imports: [AuthModule, UsersModule, AttendanceModule, PrismaModule, FileModule, RequestsModule, AdminModule, EventsModule, ChatsModule, FeedbackModule, CompanyModule, IndustryModule, ScheduleModule],
   providers: [JwtStrategy, FileService],
   controllers: [FileController]
 })

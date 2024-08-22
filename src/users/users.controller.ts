@@ -49,7 +49,7 @@ export class UsersController {
 		const {password, ...updatedDto} =  updateUserDto;
     return this.usersService.update(req.user.id, updatedDto);
   }
-
+  
   @Get(':username')
   @ApiOperation({ summary: 'Information about a user via username' })
   @ApiOkResponse({ type: CreateUserDto })
@@ -65,26 +65,6 @@ export class UsersController {
     
     const {password, ...user} = userRaw;
     return user;
-  }
-
-  @Get(':username/avatar')
-  @ApiOperation({ summary: 'User\'s avatar' })
-  @ApiOkResponse({ description: 'Image' })
-  async getUserAvatar(
-    @Param('username') username: string,
-    @Res() res: ResponseType,
-    @Query('size') imageSize: string
-  ){
-    const isID = !isNaN(+username);
-    const userRaw = isID ? await this.usersService.findOne(+username) : await this.usersService.findOneByUsername(username);
-
-    if(!userRaw) {
-      throw new NotFoundException('User not found');
-    }
-
-    const size = imageSize ? +imageSize : 200;
-    
-    return res.end(toPng(userRaw.username, size));
   }
 
   @Get(':username/online')

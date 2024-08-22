@@ -38,6 +38,8 @@ model User {
   StaffRequest StaffRequest[]
   Message Message[]
   Admin Admin[]
+  Feedback Feedback[]
+  Schedule Schedule[]
 }
 
 model Attachment {
@@ -50,6 +52,7 @@ model Attachment {
 
   Attendance Attendance[]
   StaffRequest StaffRequest[]
+  Feedback Feedback[]
 }
 
 model Attendance {
@@ -144,4 +147,79 @@ model Message {
   content String
 
   attachments MessageAttachment[]
+}
+
+model Industry {
+  id Int @id @default(autoincrement())
+  
+  name String
+  description String
+
+  Company Company[]
+}
+
+model Company {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  name String @db.VarChar(45)
+
+  phoneNo String 
+  address String @db.VarChar(45)
+  email   String 
+
+  industry Industry @relation(fields: [industryId], references: [id])
+  industryId Int
+
+  Feedback Feedback[]
+}
+
+enum FeedbackStatus {
+  ACCEPTED
+  ALMOST_ACCEPTED
+  UNDECIDED
+  ALMOST_REJECTED
+  REJECTED
+}
+
+
+model Feedback {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  
+  text String
+
+  attachment   Attachment? @relation(fields: [attachmentId], references: [id])
+  attachmentId Int?
+
+  // Company
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId Int?
+
+  status FeedbackStatus
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model Schedule {
+  id Int @id @default(autoincrement())
+
+  day Day
+
+  startTime  DateTime
+  endTime    DateTime
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
 }

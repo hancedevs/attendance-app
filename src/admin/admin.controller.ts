@@ -1,14 +1,15 @@
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
-import { Body, Controller, Get, Param, Patch, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { Attendance } from '@/attendance/entity/attendance.entity';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
 import { StaffRequest } from '@/requests/entity/staff-request.entity';
 import { StaffRequestStatus } from '@prisma/client';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
+import { CreateScheduleDto } from '@/schedule/dto/create-schedule.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -74,6 +75,61 @@ export class AdminController {
 		@Body() request: UpdateRequestStatusDto
 	){
 		return await this.service.changeRequestStatus(+id, request.status)
+	}
+
+	@Post('schedule/:userId')
+	@ApiOperation({ summary: 'Create schedules for user' })
+	@ApiBody({ type: [CreateScheduleDto] })
+	@ApiCreatedResponse({ type: [CreateScheduleDto] })
+	async createStaffSchedule(
+		@Param('userId') userId: string,
+		@Body() schedule: CreateScheduleDto[]
+	){
+		return this.service.createSchedule(+userId, schedule);
+	}
+
+	@Get('feedback-analytics')
+	@ApiOperation({ summary: 'Fetch feedback with parameters' })
+	@ApiQuery({ name: 'user', required: false })
+	@ApiQuery({ name: 'industry', required: false })
+	@ApiQuery({ name: 'company', required: false })
+	@ApiQuery({ name: 'startDate', required: false })
+	@ApiQuery({ name: 'endDate', required: false })
+	@ApiQuery({ name: 'feedbacks', required: false })
+	@ApiOkResponse({ example: {
+		totalFeedbacks: 3,
+		industryAnalytics: {
+			industry: {
+        "id": 1,
+        "name": "Something",
+        "description": "some thing some thing"
+      },
+			"status": {
+        "ACCEPTED": 1,
+        "ALMOST_ACCEPTED": 0,
+        "UNDECIDED": 1,
+        "ALMOST_REJECTED": 0,
+        "REJECTED": 1
+      },
+      "feedbacks": []
+		}
+	} })
+	async fetchAllFeedback(
+		@Query('user') userId: number,
+		@Query('industry') industryId: number,
+		@Query('company') companyId: number,
+		@Query('startDate') startDate: string,
+		@Query('endDate') endDate: string,
+		@Query('feedbacks') includeFeedbacks: string,
+	){
+		return this.service.fetchFeedbackAnalytics({
+			userId: +userId,
+			industryId: +industryId,
+			companyId: +companyId,
+			startDate,
+			endDate,
+			includeFeedbacks: includeFeedbacks === 'true'
+		});
 	}
 
 }

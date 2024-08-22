@@ -1,6 +1,38 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/file/avatar/{username}": {
+      "get": {
+        "operationId": "FileController_getUserAvatar",
+        "summary": "User's avatar",
+        "parameters": [
+          {
+            "name": "username",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image"
+          }
+        },
+        "tags": [
+          "file"
+        ]
+      }
+    },
     "/file": {
       "post": {
         "operationId": "FileController_createRequest",
@@ -205,38 +237,6 @@
                 }
               }
             }
-          }
-        },
-        "tags": [
-          "user"
-        ]
-      }
-    },
-    "/user/{username}/avatar": {
-      "get": {
-        "operationId": "UsersController_getUserAvatar",
-        "summary": "User's avatar",
-        "parameters": [
-          {
-            "name": "username",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "size",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Image"
           }
         },
         "tags": [
@@ -878,6 +878,139 @@
         ]
       }
     },
+    "/admin/schedule/{userId}": {
+      "post": {
+        "operationId": "AdminController_createStaffSchedule",
+        "summary": "Create schedules for user",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CreateScheduleDto"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateScheduleDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/feedback-analytics": {
+      "get": {
+        "operationId": "AdminController_fetchAllFeedback",
+        "summary": "Fetch feedback with parameters",
+        "parameters": [
+          {
+            "name": "user",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "industry",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "company",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "feedbacks",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "totalFeedbacks": 3,
+                  "industryAnalytics": {
+                    "industry": {
+                      "id": 1,
+                      "name": "Something",
+                      "description": "some thing some thing"
+                    },
+                    "status": {
+                      "ACCEPTED": 1,
+                      "ALMOST_ACCEPTED": 0,
+                      "UNDECIDED": 1,
+                      "ALMOST_REJECTED": 0,
+                      "REJECTED": 1
+                    },
+                    "feedbacks": []
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/chats/{conversationId}": {
       "get": {
         "operationId": "ChatsController_getFromConversation",
@@ -934,6 +1067,469 @@
         },
         "tags": [
           "chats"
+        ]
+      }
+    },
+    "/feedback": {
+      "post": {
+        "operationId": "FeedbackController_create",
+        "summary": "Create one Feedback",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "feedback"
+        ]
+      },
+      "get": {
+        "operationId": "FeedbackController_findAll",
+        "summary": "Get all Feedback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateFeedbackDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "feedback"
+        ]
+      }
+    },
+    "/feedback/{id}": {
+      "get": {
+        "operationId": "FeedbackController_findOne",
+        "summary": "Get one Feedback by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "feedback"
+        ]
+      },
+      "put": {
+        "operationId": "FeedbackController_update",
+        "summary": "Edit one Feedback by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "feedback"
+        ]
+      },
+      "delete": {
+        "operationId": "FeedbackController_delete",
+        "summary": "Delete one Feedback by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "feedback"
+        ]
+      }
+    },
+    "/company": {
+      "post": {
+        "operationId": "CompanyController_create",
+        "summary": "Create one Company",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "company"
+        ]
+      },
+      "get": {
+        "operationId": "CompanyController_findAll",
+        "summary": "Get all Company",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateCompanyDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "company"
+        ]
+      }
+    },
+    "/company/{id}": {
+      "get": {
+        "operationId": "CompanyController_findOne",
+        "summary": "Get one Company by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "company"
+        ]
+      },
+      "put": {
+        "operationId": "CompanyController_update",
+        "summary": "Edit one Company by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "company"
+        ]
+      },
+      "delete": {
+        "operationId": "CompanyController_delete",
+        "summary": "Delete one Company by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "company"
+        ]
+      }
+    },
+    "/industry": {
+      "post": {
+        "operationId": "IndustryController_create",
+        "summary": "Create one Industry",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIndustryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIndustryDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "industry"
+        ]
+      },
+      "get": {
+        "operationId": "IndustryController_findAll",
+        "summary": "Get all Industry",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateIndustryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "industry"
+        ]
+      }
+    },
+    "/industry/{id}": {
+      "get": {
+        "operationId": "IndustryController_findOne",
+        "summary": "Get one Industry by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIndustryDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "industry"
+        ]
+      },
+      "put": {
+        "operationId": "IndustryController_update",
+        "summary": "Edit one Industry by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIndustryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIndustryDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "industry"
+        ]
+      },
+      "delete": {
+        "operationId": "IndustryController_delete",
+        "summary": "Delete one Industry by `id`",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "industry"
+        ]
+      }
+    },
+    "/schedule": {
+      "get": {
+        "operationId": "ScheduleController_getSchedules",
+        "summary": "Get all schedules for the current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleEntity"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "schedule"
         ]
       }
     }
@@ -1216,6 +1812,27 @@
           "status"
         ]
       },
+      "CreateScheduleDto": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "day": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime",
+          "day"
+        ]
+      },
       "MessageEntity": {
         "type": "object",
         "properties": {
@@ -1269,6 +1886,139 @@
           "members",
           "type",
           "createdAt"
+        ]
+      },
+      "CreateFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "attachmentId": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "companyId": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "attachmentId",
+          "userId",
+          "companyId",
+          "status"
+        ]
+      },
+      "UpdateFeedbackDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phoneNo": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "industryId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "phoneNo",
+          "address",
+          "email",
+          "industryId"
+        ]
+      },
+      "UpdateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phoneNo": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "industryId": {
+            "type": "number"
+          }
+        }
+      },
+      "CreateIndustryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      },
+      "UpdateIndustryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ScheduleEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "day": {
+            "type": "string"
+          },
+          "startTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "userId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "day",
+          "startTime",
+          "endTime",
+          "userId"
         ]
       }
     }

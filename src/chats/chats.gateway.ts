@@ -46,6 +46,8 @@ export class ChatsGateway {
       );
     }
 
+    // console.log(sender.id, 'to', reciever.id);
+
     const message = await this.chats.createMessage(
       conversation.id,
       sender.id,

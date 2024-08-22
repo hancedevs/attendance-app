@@ -1,5 +1,5 @@
 import { UploadDestination } from '@/const/upload-destination';
-import { Controller, Get, NotFoundException, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { createReadStream, existsSync, statfsSync, statSync } from 'fs';
@@ -7,10 +7,35 @@ import { basename, extname, join } from 'path';
 import { lookup, types } from 'mime-types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { toPng } from 'jdenticon';
+import { UsersService } from '@/users/users.service';
 
 @ApiTags('file')
 @Controller('file')
 export class FileController {
+  constructor(
+    private readonly usersService: UsersService
+  ) {}
+
+  @Get('avatar/:username')
+  @ApiOperation({ summary: 'User\'s avatar' })
+  @ApiOkResponse({ description: 'Image' })
+  async getUserAvatar(
+    @Param('username') username: string,
+    @Res() res: Response,
+    @Query('size') imageSize: string
+  ){
+    const isID = !isNaN(+username);
+    const userRaw = isID ? await this.usersService.findOne(+username) : await this.usersService.findOneByUsername(username);
+
+    if(!userRaw) {
+      throw new NotFoundException('User not found');
+    }
+
+    const size = imageSize ? +imageSize : 200;
+    
+    return res.end(toPng(userRaw.username, size));
+  }
 
 
 	@Post()
