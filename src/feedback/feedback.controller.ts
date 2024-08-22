@@ -1,16 +1,18 @@
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { SalesGuard } from './sales.guard';
 import { FeedbackService } from './feedback.service';
-import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BasicCommonCRUDController } from '@/common/basic-crud.controller';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { BasicCRUDDto } from '@/common/basic-crud.dto';
 import { User } from '@prisma/client';
+import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 
 @ApiTags('feedback')
 @Controller('feedback')
-@UseGuards(JwtAuthGuard, )
+@UseGuards(JwtAuthGuard, SalesGuard)
+@UseInterceptors(PaginationInterceptor)
 export class FeedbackController
 	extends BasicCommonCRUDController<FeedbackService>('Feedback', CreateFeedbackDto, UpdateFeedbackDto) {
 	constructor(
@@ -32,4 +34,14 @@ export class FeedbackController
 	) {
 		return this.service.create(req.user.id, createCompanyDto);
 	}
+
+	@Get()
+	@ApiOperation({ summary: `Get all user feedbacks` })
+	@ApiOkResponse({ type: [CreateFeedbackDto] })
+	override findAll(
+		@Req() req?: { user: User }
+	) {
+		return this.service.findAllBy(req.user.id);
+	}
+
 }

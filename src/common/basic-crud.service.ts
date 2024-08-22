@@ -15,7 +15,7 @@ export function BasicCommonCRUDService<CreateDto, UpdateDto>(tableName: string){
 				include: this.includes,
 			});
 		}
-	
+		
 		async findOne(id: number) {
 			return this.prisma[tableName].findUnique({
 				where: { id },

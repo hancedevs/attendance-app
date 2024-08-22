@@ -2,6 +2,7 @@ import { Body, Delete, Get, Param, ParseIntPipe, Post, Put } from "@nestjs/commo
 import { BasicCommonCRUDService } from "./basic-crud.service";
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiProperty } from "@nestjs/swagger";
 import { BasicCRUDDto } from "./basic-crud.dto";
+import { PaginatedRoute } from "@/pagination/pagination.decorator";
 
 
 
@@ -26,6 +27,7 @@ export function BasicCommonCRUDController<
 		@Get()
 		@ApiOperation({ summary: `Get all ${name}` })
 		@ApiOkResponse({ type: [CreateDto] })
+		@PaginatedRoute()
 		findAll() {
 			return this.service.findAll();
 		}

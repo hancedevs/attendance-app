@@ -40,6 +40,7 @@
     "jsonwebtoken": "^9.0.2",
     "mime-types": "^2.1.35",
     "passport-jwt": "^4.0.1",
+    "react-native-gesture-handler": "^2.18.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1"

@@ -1103,7 +1103,7 @@
       },
       "get": {
         "operationId": "FeedbackController_findAll",
-        "summary": "Get all Feedback",
+        "summary": "Get all user feedbacks",
         "parameters": [],
         "responses": {
           "200": {

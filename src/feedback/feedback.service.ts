@@ -9,6 +9,7 @@ export class FeedbackService
 	constructor(public prisma: PrismaService) {
 		super(prisma);
 	}
+	includes = { company: { include: { industry: true } } };
 
 	async create(data: CreateFeedbackDto): Promise<any>;
   async create(userId: number, data: CreateFeedbackDto): Promise<any>;
@@ -20,6 +21,16 @@ export class FeedbackService
       return super.create(userIdOrData);
     }
   }
+
+	async findAllBy(userId: number) {
+		return this.prisma.feedback.findMany({
+			where: { userId },
+			include: this.includes,
+			orderBy: {
+				createdAt: 'desc'
+			}
+		});
+	}
 
 	async searchFeedback(searchParams: {
 		userId?: number,
