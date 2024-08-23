@@ -213,6 +213,48 @@
         ]
       }
     },
+    "/user/all": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "summary": "Get all users",
+        "parameters": [
+          {
+            "name": "fromId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "count",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateUserDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "user"
+        ]
+      }
+    },
     "/user/{username}": {
       "get": {
         "operationId": "UsersController_getUser",
@@ -1035,6 +1077,37 @@
                   "items": {
                     "$ref": "#/components/schemas/MessageEntity"
                   }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
+        ]
+      }
+    },
+    "/chats/create/{userId}": {
+      "post": {
+        "operationId": "ChatsController_createConversation",
+        "summary": "Create a conversation with a user",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationEntity"
                 }
               }
             }

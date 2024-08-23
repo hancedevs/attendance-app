@@ -26,6 +26,8 @@ export class ChatsGateway {
     const sender: User = client.data.user;
     const reciever = data.reciever ? await this.users.findOneByUsername(data.reciever) : await this.users.findOne(data.recieverId);
 
+    console.log(sender, reciever);
+
     if(!sender){
       throw new UnauthorizedException();
     }

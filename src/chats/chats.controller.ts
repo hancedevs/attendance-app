@@ -1,5 +1,5 @@
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
-import { Controller, Get, Param, Request, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Post, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MessageEntity } from './entities/message.entity';
@@ -24,6 +24,17 @@ export class ChatsController {
 		@Request() req: { user: User },
 	){
 		return this.service.getAllMessagesFromConversation(+conversationId, req.user.id);
+	}
+
+	@Post('create/:userId')
+	@ApiOperation({ summary: 'Create a conversation with a user' })
+	@ApiOkResponse({ type: ConversationEntity })
+	async createConversation(
+		@Param('userId') userId: string,
+		@Request() req: { user: User },
+	){
+		const hasAConversation = await this.service.findPrivateConversation(req.user.id, +userId)
+		return hasAConversation || await this.service.createPrivateConversation(req.user.id, +userId);
 	}
 	
 	@Get()

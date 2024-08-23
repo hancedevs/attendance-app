@@ -12,6 +12,7 @@ import {
   NotFoundException,
   Response,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,10 +23,13 @@ import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, 
 import { EventsService } from '@/events/events.service';
 import { toPng } from 'jdenticon';
 import { Response as ResponseType } from 'express';
+import { PaginatedRoute } from '@/pagination/pagination.decorator';
+import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 
 @ApiTags('user')
 @Controller('user')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(PaginationInterceptor)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -39,6 +43,20 @@ export class UsersController {
 		const userRaw = await this.usersService.findOne(req.user.id);
 		const {password, ...user} = userRaw;
     return user;
+  }
+
+  @Get('/all')
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiOkResponse({ type: [CreateUserDto] })
+  @PaginatedRoute()
+  async findAll(
+    @Query('fromId') fromId: string,
+    @Query('count') count: string
+  ) {
+    return this.usersService.findAll(
+      fromId ? +fromId : undefined,
+      count ? +count : undefined
+    );
   }
 
   @Patch()

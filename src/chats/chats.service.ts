@@ -20,7 +20,8 @@ export class ChatsService {
 					members: {
 						has: recieverId
 					}
-				}
+				},
+				type: ConversationType.PRIVATE
 			}
 		});
 	}

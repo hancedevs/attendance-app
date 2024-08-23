@@ -8,6 +8,7 @@ import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { BasicCRUDDto } from '@/common/basic-crud.dto';
 import { User } from '@prisma/client';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
+import { PaginatedRoute } from '@/pagination/pagination.decorator';
 
 @ApiTags('feedback')
 @Controller('feedback')
@@ -38,6 +39,7 @@ export class FeedbackController
 	@Get()
 	@ApiOperation({ summary: `Get all user feedbacks` })
 	@ApiOkResponse({ type: [CreateFeedbackDto] })
+	@PaginatedRoute()
 	override findAll(
 		@Req() req?: { user: User }
 	) {

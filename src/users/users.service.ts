@@ -13,6 +13,23 @@ export class UsersService {
     return this.prisma.user.create({ data: { ...createUserDto } });
   }
 
+  findAll(fromId?: number, count?: number){
+    return this.prisma.user.findMany({
+      select: {
+        username: true,
+        email: true,
+        name: true,
+        role: true,
+        id: true,
+        createdAt: true
+      },
+      cursor: fromId ? {
+        id: fromId
+      } : undefined,
+      take: count
+    });
+  }
+
   findOne(id: number) {
     return this.prisma.user.findUnique({ where: { id: id } });
   }
