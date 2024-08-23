@@ -18,7 +18,8 @@ export class ScheduleService {
 						userId,
 						startTime: schedule.startTime,
 						endTime: schedule.endTime,
-						day: schedule.day
+						day: schedule.day,
+						uniform: schedule.uniform || false
 					}
 				});
 			})
@@ -29,7 +30,8 @@ export class ScheduleService {
 		return (await this.prisma.schedule.findMany({ where: { userId } })).map((item) => ({
 			day: item.day,
 			startTime: item.startTime,
-			endTime: item.endTime
+			endTime: item.endTime,
+			uniform: item.uniform
 		} as CreateScheduleDto));
 	}
 

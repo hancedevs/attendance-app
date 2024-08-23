@@ -1595,7 +1595,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ScheduleEntity"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScheduleEntity"
+                  }
                 }
               }
             }
@@ -1898,12 +1901,16 @@
           },
           "day": {
             "type": "string"
+          },
+          "uniform": {
+            "type": "boolean"
           }
         },
         "required": [
           "startTime",
           "endTime",
-          "day"
+          "day",
+          "uniform"
         ]
       },
       "MessageEntity": {
@@ -2084,6 +2091,9 @@
           },
           "userId": {
             "type": "number"
+          },
+          "uniform": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -2091,7 +2101,8 @@
           "day",
           "startTime",
           "endTime",
-          "userId"
+          "userId",
+          "uniform"
         ]
       }
     }

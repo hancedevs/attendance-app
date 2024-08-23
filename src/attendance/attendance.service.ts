@@ -1,11 +1,16 @@
 import { PrismaService } from '@/prisma/prisma.service';
+import { CreateScheduleDto } from '@/schedule/dto/create-schedule.dto';
+import { ScheduleService } from '@/schedule/schedule.service';
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Attachment, Attendance, AttendType } from '@prisma/client';
-import { subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'; // Assumes you have date-fns for date manipulation
+import { Attachment, Attendance, AttendType, Day } from '@prisma/client';
+import { subDays, startOfWeek, endOfWeek, startOfMonth, addDays, endOfMonth } from 'date-fns'; // Assumes you have date-fns for date manipulation
 
 @Injectable()
 export class AttendanceService {
-	constructor(private prisma: PrismaService) { }
+	constructor(
+		private prisma: PrismaService,
+		private scheduleService: ScheduleService
+	) { }
 
 
 	groupByDate(attandances: Attendance[]) {
@@ -19,12 +24,15 @@ export class AttendanceService {
 		}, {});
 	}
 
-	mapStatus(attandances: Attendance[]) {
+	mapStatus(attendances: Attendance[]) {
 		let hours = [];
 		let currentPair = [];
 		let totalMilliseconds = 0;
 
-		attandances.forEach((entry) => {
+		const userId = attendances[0]?.userId;
+		const date = attendances[0]?.date.toDateString();
+
+		attendances.forEach((entry) => {
 			if (entry.status === AttendType.IN || entry.status === AttendType.RESUME) {
 				if (currentPair.length > 0) {
 					currentPair.unshift(entry.date);
@@ -38,8 +46,8 @@ export class AttendanceService {
 			}
 		});
 
-		const checkedIn = attandances.find(attachment => attachment.status == AttendType.IN);
-		const checkedOut = attandances.find(attachment => attachment.status == AttendType.OUT);
+		const checkedIn = attendances.find(attachment => attachment.status == AttendType.IN);
+		const checkedOut = attendances.find(attachment => attachment.status == AttendType.OUT);
 
 		const totalSeconds = Math.floor(totalMilliseconds / 1000);
 		const minutes = Math.floor(totalSeconds / 60);
@@ -48,9 +56,6 @@ export class AttendanceService {
 		const minutesValue = minutes % 60;
 
 		const wasAbsent = checkedOut && !checkedIn;
-
-
-		const date = attandances[0].date.toDateString();
 
 		return wasAbsent ? {
 			date,
@@ -62,7 +67,7 @@ export class AttendanceService {
 				in: checkedIn?.date.getTime(),
 				out: checkedOut?.date.getTime()
 			},
-			attandances: attandances.map(a => a.id),
+			attandances: attendances.map(a => a.id),
 			hours: hours.map(pair => pair.map((date: Date) => date.toLocaleTimeString())),
 			totalTime: totalSeconds, // Total time in seconds
 			totalMinutes: `${minutesValue.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`, // MM:SS
@@ -72,9 +77,80 @@ export class AttendanceService {
 		};
 	}
 
-	fixAttendances(data: Attendance[]) {
-		const groupedByDate = this.groupByDate(data);
-		return Object.keys(groupedByDate).map(date => this.mapStatus(groupedByDate[date]));
+	fixAttendances(data: Attendance[], schedules: CreateScheduleDto[]) {
+		const userId = data[0].userId;
+		const scheduleAttendances: Attendance[] = [];
+		const checkedWeeks: Set<string> = new Set();
+
+		const today = new Date().toLocaleDateString();
+
+		const formatDate = (date: Date): string => date.toISOString().split('T')[0];
+
+		const getDateForDay = (weekStart: Date, dayOffset: number): Date => {
+			return addDays(weekStart, dayOffset);
+		};
+
+		const scheduleDays = new Set(schedules.filter(schedule => schedule.uniform).map(schedule => schedule.day.toLowerCase()));
+
+		let lastAttachmentId = null;
+
+		for (const attendance of data) {
+			const weekStart = startOfWeek(attendance.date, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(attendance.date, { weekStartsOn: 1 });
+			const weekKey = `${formatDate(weekStart)}-${formatDate(weekEnd)}`;
+
+			if (attendance.attachmentId) {
+				lastAttachmentId = attendance.attachmentId;
+			} else {
+				lastAttachmentId = null;
+			}
+
+			if (checkedWeeks.has(weekKey)) continue;
+
+			for (let i = 0; i < 7; i++) {
+				const dayDate = getDateForDay(weekStart, i);
+				if (today == dayDate.toLocaleDateString()) continue;
+				const formattedDay = formatDate(dayDate);
+
+				const dayOfWeek = Object.keys(Day)[i];
+
+				if (!dayOfWeek || !scheduleDays.has(dayOfWeek.toLowerCase() as any)) continue;
+
+				const exists = data.some(att => formatDate(att.date) === formattedDay);
+
+				if (!exists) {
+					scheduleAttendances.push({
+						id: -12,
+						date: dayDate,
+						status: AttendType.OUT,
+						userId: userId,
+						attachmentId: lastAttachmentId
+					});
+				}
+			}
+
+			checkedWeeks.add(weekKey);
+		}
+
+		const allAttendances = [...data, ...scheduleAttendances];
+
+		const groupedByDate = this.groupByDate(allAttendances as any);
+
+		return Object.keys(groupedByDate)
+			.map(date => this.mapStatus(groupedByDate[date]))
+			.sort((a, b) => {
+				const dateA = new Date(a.date);
+				const dateB = new Date(b.date);
+
+				const weekStartA = startOfWeek(dateA, { weekStartsOn: 1 });
+				const weekStartB = startOfWeek(dateB, { weekStartsOn: 1 });
+
+				if (weekStartA.getTime() !== weekStartB.getTime()) {
+					return weekStartA.getTime() - weekStartB.getTime();
+				}
+
+				return dateA.getDay() - dateB.getDay();
+			});
 	}
 
 	async checkToday(userId: number, status: AttendType) {
@@ -159,7 +235,7 @@ export class AttendanceService {
 			orderBy: {
 				date: 'desc',
 			}
-		}));
+		}), await this.scheduleService.getSchedule(userId));
 	}
 
 	async getAttendanceSummaryFrom(
@@ -167,7 +243,7 @@ export class AttendanceService {
 		startDate: Date,
 		endDate: Date,
 		includeDailySummaries = false
-	){
+	) {
 		const attendances = await this.prisma.attendance.findMany({
 			where: {
 				userId,
@@ -181,7 +257,7 @@ export class AttendanceService {
 			}
 		});
 
-		const dailySummaries = this.fixAttendances(attendances);
+		const dailySummaries = this.fixAttendances(attendances, await this.scheduleService.getSchedule(userId));
 
 		const totalDurationSeconds = dailySummaries.reduce((acc, day) => acc + day.totalTime, 0);
 		const totalDurationMinutes = Math.floor(totalDurationSeconds / 60);
@@ -198,13 +274,15 @@ export class AttendanceService {
 		};
 	}
 
-	async getAttachment(attachmentId: number, userId?: number){
+	async getAttachment(attachmentId: number, userId?: number) {
 		return await this.prisma.attachment.findUnique({
-			where: { id: attachmentId, Attendance: userId ? {
-				some: {
-					userId
-				}
-			} : undefined, }
+			where: {
+				id: attachmentId, Attendance: userId ? {
+					some: {
+						userId
+					}
+				} : undefined,
+			}
 		});
 	}
 
@@ -220,9 +298,9 @@ export class AttendanceService {
 		);
 	}
 
-	async getMonthlyAttendance(userId: number, includeDailySummaries = false){
+	async getMonthlyAttendance(userId: number, includeDailySummaries = false) {
 		const startOfMonthDate = startOfMonth(new Date());
-    const endOfMonthDate = endOfMonth(new Date());
+		const endOfMonthDate = endOfMonth(new Date());
 
 		return await this.getAttendanceSummaryFrom(
 			userId,

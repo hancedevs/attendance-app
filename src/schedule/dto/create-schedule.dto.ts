@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Day } from "@prisma/client";
-import { IsArray, IsDate, IsEnum } from "class-validator";
+import { IsArray, IsDate, IsEnum, IsOptional } from "class-validator";
 
 
 
@@ -17,5 +17,9 @@ export class CreateScheduleDto {
 	@ApiProperty()
 	@IsEnum(Day)
 	day: Day;
+
+	@ApiProperty()
+	@IsOptional()
+	uniform?: boolean;
 
 }

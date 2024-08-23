@@ -25,4 +25,7 @@ export class ScheduleEntity implements Schedule {
 	@ApiProperty()
 	@IsNumber()
 	userId: number;
+
+	@ApiProperty()
+	uniform: boolean;
 }
