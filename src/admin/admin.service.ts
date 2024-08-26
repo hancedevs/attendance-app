@@ -7,6 +7,7 @@ import { ScheduleService } from '@/schedule/schedule.service';
 import { UsersService } from '@/users/users.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Attendance, AttendType, Feedback, FeedbackStatus, Industry, StaffRequestStatus } from '@prisma/client';
+import { CreateIPDto } from './dto/create-ip.dto';
 
 @Injectable()
 export class AdminService {
@@ -106,6 +107,22 @@ export class AdminService {
       totalFeedbacks,
       industryAnalytics,
     };
+	}
+
+	async getAllIPAddress(){
+		return await this.prisma.iPAddress.findMany();
+	}
+
+	async addIPAddress(address: CreateIPDto){
+		return await this.prisma.iPAddress.create({
+			data: address
+		});
+	}
+
+	async rmIPAddress(id: number){
+		return await this.prisma.iPAddress.delete({
+			where: { id }
+		});
 	}
 
 }

@@ -1,7 +1,7 @@
 import { PartialType } from "@nestjs/mapped-types";
 import { MessageEntity } from "../entities/message.entity";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsOptional } from "class-validator";
+import { IsArray, IsBoolean, IsNumber, IsOptional } from "class-validator";
 
 
 export class CreateMessageDto extends PartialType(MessageEntity) {
@@ -24,4 +24,9 @@ export class CreateMessageDto extends PartialType(MessageEntity) {
 	@IsOptional()
 	@IsNumber()
 	groupId?: number;
+
+	@ApiProperty()
+	@IsOptional()
+	@IsArray()
+	attachments?: string[];
 }

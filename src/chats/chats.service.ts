@@ -70,7 +70,21 @@ export class ChatsService {
 						username: true,
 						email: true
 					}
-				}
+				},
+				attachments: true
+			}
+		});
+	}
+
+	async getMessageById(id: number){
+		return this.prisma.message.findUnique({ where: { id }, include: { attachments: true } });
+	}
+
+	async createMessageAttachment(messageId: number, filename: string){
+		return await this.prisma.messageAttachment.create({
+			data: {
+				messageId,
+				filename
 			}
 		});
 	}
@@ -84,6 +98,9 @@ export class ChatsService {
 						has: userId
 					}
 				}
+			},
+			include: {
+				attachments: true
 			},
 			orderBy: {
 				createdAt: 'desc'
@@ -101,6 +118,14 @@ export class ChatsService {
 			include: {
 				Message: {
 					take: 1,
+					include: {
+						attachments: {
+							take: 2,
+							select: {
+								filename: true
+							}
+						}
+					},
 					orderBy: {
 						createdAt: 'desc'
 					}

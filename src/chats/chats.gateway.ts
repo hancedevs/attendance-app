@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UsersService } from '@/users/users.service';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Message, User } from '@prisma/client';
 import { ApiOperation } from '@nestjs/swagger';
 import { ApiWebSocketEvent } from '@/doc/api-sockets.decorator';
 
@@ -50,14 +50,22 @@ export class ChatsGateway {
 
     // console.log(sender.id, 'to', reciever.id);
 
-    const message = await this.chats.createMessage(
+    let message: Message = await this.chats.createMessage(
       conversation.id,
       sender.id,
       data
     );
+
+    if(data.attachments){
+      for(let filename of data.attachments){
+        await this.chats.createMessageAttachment(message.id, filename);
+      }
+      message = await this.chats.getMessageById(message.id);
+    }
     
     client.emit('send-message', message);
     this.server.to(reciever.id.toString()).emit('send-message', message);
+    return message;
   }
 
   @SubscribeMessage('send-message:group')

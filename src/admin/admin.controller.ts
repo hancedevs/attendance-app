@@ -1,5 +1,5 @@
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
-import { Body, Controller, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -10,6 +10,7 @@ import { StaffRequest } from '@/requests/entity/staff-request.entity';
 import { StaffRequestStatus } from '@prisma/client';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
 import { CreateScheduleDto } from '@/schedule/dto/create-schedule.dto';
+import { CreateIPDto } from './dto/create-ip.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -86,6 +87,33 @@ export class AdminController {
 		@Body() schedule: CreateScheduleDto[]
 	){
 		return this.service.createSchedule(+userId, schedule);
+	}
+
+
+	@Get('ip-addr')
+	@ApiOperation({ summary: 'Get all IP addresses' })
+	@ApiOkResponse({ type: StaffRequest })
+	async getIP(){
+		return await this.service.getAllIPAddress();
+	}
+
+	@Post('ip-addr')
+	@ApiOperation({ summary: 'Register IP Address' })
+	@ApiBody({ type: CreateIPDto })
+	@ApiCreatedResponse({ type: CreateIPDto })
+	async registerIP(
+		@Body() address: CreateIPDto
+	){
+		return await this.service.addIPAddress(address);
+	}
+
+
+	@Delete('ip-addr/:id')
+	@ApiOperation({ summary: 'Delete IP Address' })
+	async deleteIP(
+		@Param('id') id: string
+	){
+		return await this.service.rmIPAddress(+id);
 	}
 
 	@Get('feedback-analytics')

@@ -225,3 +225,10 @@ model Schedule {
 
   uniform Boolean @default(false)
 }
+
+model IPAddress {
+  id Int @id @default(autoincrement())
+
+  address String
+  name String
+}

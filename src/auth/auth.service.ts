@@ -38,7 +38,7 @@ export class AuthService {
     };
     const token = this.jwtService.sign(payload);
 
-    return { token, role: user.role, id: user.id, admin: await this.prisma.admin.findFirst({ where: { userId: user.id } }) };
+    return { token, role: user.role, id: user.id, admin: (await this.prisma.admin.findFirst({ where: { userId: user.id } })) ? true : false };
   }
 
   async register(userDto: CreateUserDto) {

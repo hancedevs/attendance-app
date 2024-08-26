@@ -35,7 +35,21 @@
     },
     "/file": {
       "post": {
-        "operationId": "FileController_createRequest",
+        "operationId": "FileController_uploadOne",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "file"
+        ]
+      }
+    },
+    "/file/multi": {
+      "post": {
+        "operationId": "FileController_uploadMany",
         "parameters": [],
         "responses": {
           "201": {
@@ -376,14 +390,6 @@
         "parameters": [
           {
             "name": "type",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
             "required": true,
             "in": "query",
             "description": "The current status",
@@ -960,6 +966,82 @@
                 }
               }
             }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/ip-addr": {
+      "get": {
+        "operationId": "AdminController_getIP",
+        "summary": "Get all IP addresses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "AdminController_registerIP",
+        "summary": "Register IP Address",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIPDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIPDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/ip-addr/{id}": {
+      "delete": {
+        "operationId": "AdminController_deleteIP",
+        "summary": "Delete IP Address",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         },
         "tags": [
@@ -1911,6 +1993,21 @@
           "endTime",
           "day",
           "uniform"
+        ]
+      },
+      "CreateIPDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "name"
         ]
       },
       "MessageEntity": {

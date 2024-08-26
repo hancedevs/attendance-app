@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Post, Query, Request, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Post, Query, Request, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Attendance } from './entity/attendance.entity';
 import { Attachment, AttendType, User } from '@prisma/client';
@@ -121,9 +121,13 @@ export class AttendanceController {
 
 	@Post()
   @ApiOperation({ summary: 'Change the current status' })
-  @ApiQuery({ name: 'status', enum: AttendType, description: 'The current status' })
+  @ApiQuery({ name: 'type', enum: AttendType, description: 'The current status' })
 	@ApiOkResponse({ type: Attendance })
-  async create(@Request() req: { user: User }, @Query('type') status: AttendType) {
+  async create(@Request() req: { user: User, ip: string }, @Query('type') status: AttendType) {
+		const ipAllowed = await this.service.checkIpAddress(req.ip);
+		if(!ipAllowed){
+			throw new ForbiddenException(`You are using a forbidden ID: ${req.ip}`);
+		}
 		return await this.service.create(req.user.id, status);
   }
 

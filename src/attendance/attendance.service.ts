@@ -12,6 +12,11 @@ export class AttendanceService {
 		private scheduleService: ScheduleService
 	) { }
 
+	async checkIpAddress(ip: string){
+		return await this.prisma.iPAddress.findFirst({
+			where: { address: ip }
+		}) ? true : false;
+	}
 
 	groupByDate(attandances: Attendance[]) {
 		return attandances.reduce((groups, record) => {
@@ -78,6 +83,7 @@ export class AttendanceService {
 	}
 
 	fixAttendances(data: Attendance[], schedules: CreateScheduleDto[]) {
+		if(!data[0]) return [];
 		const userId = data[0].userId;
 		const scheduleAttendances: Attendance[] = [];
 		const checkedWeeks: Set<string> = new Set();
@@ -130,9 +136,11 @@ export class AttendanceService {
 			}
 
 			checkedWeeks.add(weekKey);
+
 		}
 
-		const allAttendances = [...data, ...scheduleAttendances];
+		const allAttendances = [...data, ...scheduleAttendances]
+		.filter(data => new Date(data.date).getTime() < addDays(new Date(today), 1).getTime());
 
 		const groupedByDate = this.groupByDate(allAttendances as any);
 
@@ -146,20 +154,21 @@ export class AttendanceService {
 				const weekStartB = startOfWeek(dateB, { weekStartsOn: 1 });
 
 				if (weekStartA.getTime() !== weekStartB.getTime()) {
-					return weekStartA.getTime() - weekStartB.getTime();
+					return weekStartB.getTime() - weekStartA.getTime();
 				}
 
-				return dateA.getDay() - dateB.getDay();
+				return dateB.getDay() - dateA.getDay();
 			});
 	}
 
 	async checkToday(userId: number, status: AttendType) {
-		if (status !== AttendType.PAUSE && status !== AttendType.RESUME) {
-			const startOfDay = new Date();
-			startOfDay.setHours(0, 0, 0, 0);
+		const startOfDay = new Date();
+		startOfDay.setHours(0, 0, 0, 0);
 
-			const endOfDay = new Date();
-			endOfDay.setHours(23, 59, 59, 999);
+		const endOfDay = new Date();
+		endOfDay.setHours(23, 59, 59, 999);
+
+		if (status !== AttendType.PAUSE && status !== AttendType.RESUME) {
 
 			const existingAttendance = await this.prisma.attendance.findFirst({
 				where: {
@@ -171,6 +180,23 @@ export class AttendanceService {
 					},
 				},
 			});
+
+			if(status !== AttendType.OUT) {
+				const inToday = await this.prisma.attendance.findFirst({
+					where: {
+						userId,
+						status: AttendType.OUT,
+						date: {
+							gte: startOfDay,
+							lte: endOfDay,
+						},
+					},
+				});
+
+				if (inToday) {
+					throw new ForbiddenException(`You have not registered IN today.`);
+				}
+			}
 
 			if (existingAttendance) {
 				throw new ForbiddenException(`You have already registered ${status} today.`);
@@ -184,6 +210,21 @@ export class AttendanceService {
 					date: 'desc',
 				},
 			});
+			
+			const outToday = await this.prisma.attendance.findFirst({
+				where: {
+					userId,
+					status: AttendType.OUT,
+					date: {
+						gte: startOfDay,
+						lte: endOfDay,
+					},
+				},
+			});
+
+			if (outToday) {
+				throw new ForbiddenException(`You have already registered OUT today.`);
+			}
 
 			if (latestAttendance && latestAttendance.status === status) {
 				throw new ForbiddenException(`You cannot register ${status} again without changing the status.`);
@@ -233,7 +274,7 @@ export class AttendanceService {
 				} : undefined)
 			},
 			orderBy: {
-				date: 'desc',
+				date: 'desc'
 			}
 		}), await this.scheduleService.getSchedule(userId));
 	}
@@ -257,9 +298,9 @@ export class AttendanceService {
 			}
 		});
 
-		const dailySummaries = this.fixAttendances(attendances, await this.scheduleService.getSchedule(userId));
+		const dailySummaries = attendances.length ? this.fixAttendances(attendances, await this.scheduleService.getSchedule(userId)) : [];
 
-		const totalDurationSeconds = dailySummaries.reduce((acc, day) => acc + day.totalTime, 0);
+		const totalDurationSeconds = dailySummaries.reduce((acc, day) => acc + (day.totalTime || 0), 0);
 		const totalDurationMinutes = Math.floor(totalDurationSeconds / 60);
 		const durationSecondsRemainder = totalDurationSeconds % 60;
 		const totalDurationHours = Math.floor(totalDurationMinutes / 60);
