@@ -1026,6 +1026,45 @@
       }
     },
     "/admin/ip-addr/{id}": {
+      "put": {
+        "operationId": "AdminController_editIP",
+        "summary": "Update name or enable/disable an IP Address",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditIPDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditIPDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      },
       "delete": {
         "operationId": "AdminController_deleteIP",
         "summary": "Delete IP Address",
@@ -2008,6 +2047,25 @@
         "required": [
           "address",
           "name"
+        ]
+      },
+      "EditIPDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "address",
+          "name",
+          "enabled"
         ]
       },
       "MessageEntity": {

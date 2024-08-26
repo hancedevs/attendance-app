@@ -126,7 +126,7 @@ export class AttendanceController {
   async create(@Request() req: { user: User, ip: string }, @Query('type') status: AttendType) {
 		const ipAllowed = await this.service.checkIpAddress(req.ip);
 		if(!ipAllowed){
-			throw new ForbiddenException(`You are using a forbidden ID: ${req.ip}`);
+			throw new ForbiddenException(`You are using a forbidden IP: ${req.ip}`);
 		}
 		return await this.service.create(req.user.id, status);
   }

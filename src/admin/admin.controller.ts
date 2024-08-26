@@ -1,8 +1,8 @@
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
-import { Body, Controller, Delete, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
-import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { Attendance } from '@/attendance/entity/attendance.entity';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
@@ -10,7 +10,7 @@ import { StaffRequest } from '@/requests/entity/staff-request.entity';
 import { StaffRequestStatus } from '@prisma/client';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
 import { CreateScheduleDto } from '@/schedule/dto/create-schedule.dto';
-import { CreateIPDto } from './dto/create-ip.dto';
+import { CreateIPDto, EditIPDto } from './dto/create-ip.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -108,8 +108,22 @@ export class AdminController {
 	}
 
 
+	@Put('ip-addr/:id')
+	@ApiOperation({ summary: 'Update name or enable/disable an IP Address' })
+	@ApiParam({ name: 'id', type: Number })
+	@ApiBody({ type: EditIPDto })
+	@ApiCreatedResponse({ type: EditIPDto })
+	async editIP(
+		@Param('id') id: string,
+		@Body() address: EditIPDto
+	){
+		return await this.service.updateIPAddress(+id, address);
+	}
+
+
 	@Delete('ip-addr/:id')
 	@ApiOperation({ summary: 'Delete IP Address' })
+	@ApiParam({ name: 'id' })
 	async deleteIP(
 		@Param('id') id: string
 	){

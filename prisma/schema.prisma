@@ -231,4 +231,6 @@ model IPAddress {
 
   address String
   name String
+  
+  enabled Boolean @default(false)
 }

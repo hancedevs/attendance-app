@@ -14,8 +14,10 @@ export class AttendanceService {
 
 	async checkIpAddress(ip: string){
 		return await this.prisma.iPAddress.findFirst({
-			where: { address: ip }
-		}) ? true : false;
+			where: { address: ip, enabled: true }
+		}) ? true : await this.prisma.iPAddress.count({
+			where: { enabled: true }
+		}) < 1;
 	}
 
 	groupByDate(attandances: Attendance[]) {
@@ -181,7 +183,7 @@ export class AttendanceService {
 				},
 			});
 
-			if(status !== AttendType.OUT) {
+			if(status === AttendType.OUT) {
 				const inToday = await this.prisma.attendance.findFirst({
 					where: {
 						userId,

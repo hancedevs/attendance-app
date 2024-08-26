@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { IsBoolean, IsOptional, IsString } from "class-validator";
 
 
 export class CreateIPDto {
@@ -12,4 +12,21 @@ export class CreateIPDto {
 	@IsString()
 	name: string;
 
+}
+
+export class EditIPDto {
+	@ApiProperty()
+	@IsString()
+	@IsOptional()
+	address?: string;
+
+	@ApiProperty()
+	@IsString()
+	@IsOptional()
+	name?: string;
+
+	@ApiProperty()
+	@IsBoolean()
+	@IsOptional()
+	enabled: boolean;
 }
