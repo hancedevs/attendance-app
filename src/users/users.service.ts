@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/prisma/prisma.service';
+import { comparePass, encryptPass } from '@/auth/helpers/password';
 
 @Injectable()
 export class UsersService {
@@ -38,10 +39,23 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const salt = await bcrypt.genSalt(10);
+  async update(id: number, updateUserDto: UpdateUserDto, needOldPassword = true) {
     if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+      if(needOldPassword){
+        if(!updateUserDto.currentPassword) {
+          throw new UnauthorizedException('Old password not specified');
+        }
+        const userP = await this.prisma.user.findUnique({
+          where: { id },
+          select: {
+            password: true
+          }
+        })
+        if(!await comparePass(updateUserDto.currentPassword, userP.password)){
+          throw new UnauthorizedException('Current password not correct.');
+        }
+      }
+      updateUserDto.password = await encryptPass(updateUserDto.password);
     }
     return this.prisma.user.update({
       where: { id: id },

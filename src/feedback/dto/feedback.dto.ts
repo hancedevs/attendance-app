@@ -23,7 +23,7 @@ export class CreateFeedbackDto {
 	@IsNumber()
 	companyId: number;
   
-	@ApiProperty()
+	@ApiProperty({ enum: FeedbackStatus })
 	@IsEnum(FeedbackStatus)
 	status: FeedbackStatus;
 }

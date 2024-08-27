@@ -16,10 +16,11 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { CompanyModule } from './company/company.module';
 import { IndustryModule } from './industry/industry.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { EmailService } from './email/email.service';
 
 @Module({
   imports: [AuthModule, UsersModule, AttendanceModule, PrismaModule, FileModule, RequestsModule, AdminModule, EventsModule, ChatsModule, FeedbackModule, CompanyModule, IndustryModule, ScheduleModule],
-  providers: [JwtStrategy, FileService],
+  providers: [JwtStrategy, FileService, EmailService],
   controllers: [FileController]
 })
 export class AppModule {}

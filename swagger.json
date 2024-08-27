@@ -173,6 +173,102 @@
         ]
       }
     },
+    "/auth/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "summary": "Forgot password",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/validate-reset-password-key": {
+      "post": {
+        "operationId": "AuthController_validateKey",
+        "summary": "Validate the reset password key",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthValidateKeyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "true"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "summary": "Reset password",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "true"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/user": {
       "get": {
         "operationId": "UsersController_findOne",
@@ -1806,6 +1902,51 @@
           "role"
         ]
       },
+      "AuthForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ]
+      },
+      "AuthValidateKeyDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "key"
+        ]
+      },
+      "AuthResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "key",
+          "password"
+        ]
+      },
       "DailySummary": {
         "type": "object",
         "properties": {
@@ -2139,7 +2280,14 @@
             "type": "number"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "ALMOST_ACCEPTED",
+              "UNDECIDED",
+              "ALMOST_REJECTED",
+              "REJECTED"
+            ]
           }
         },
         "required": [
