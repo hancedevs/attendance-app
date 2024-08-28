@@ -1,3 +1,4 @@
+import { EventsGateway } from '@/events/events.gateway';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateScheduleDto } from '@/schedule/dto/create-schedule.dto';
 import { ScheduleService } from '@/schedule/schedule.service';
@@ -366,6 +367,9 @@ export class AttendanceService {
 				text: attachmentData.text
 			}
 		});
+
+
+
 		return this.prisma.attendance.create({
 			data: {
 				userId,
@@ -373,5 +377,13 @@ export class AttendanceService {
 				status: AttendType.OUT,
 			},
 		});
+	}
+
+	async getAdmins(){
+		return (await this.prisma.admin.findMany({
+			include: {
+				user: true
+			}
+		})).map(admin => admin.user);
 	}
 }

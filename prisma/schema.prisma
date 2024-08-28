@@ -73,7 +73,7 @@ enum StaffRequestStatus {
   APPROVED
   PENDING
   REJECTED
-  CONSULTATION_REQURED
+  CONSULTATION_REQUIRED
 }
 
 model StaffRequest {

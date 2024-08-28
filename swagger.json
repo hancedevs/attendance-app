@@ -684,6 +684,96 @@
         ]
       }
     },
+    "/chats/{conversationId}": {
+      "get": {
+        "operationId": "ChatsController_getFromConversation",
+        "summary": "Get all messages from a conversation",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
+        ]
+      }
+    },
+    "/chats/create/{userId}": {
+      "post": {
+        "operationId": "ChatsController_createConversation",
+        "summary": "Create a conversation with a user",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationEntity"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
+        ]
+      }
+    },
+    "/chats": {
+      "get": {
+        "operationId": "ChatsController_getAllConversation",
+        "summary": "Get all conversations for current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
+        ]
+      }
+    },
     "/requests": {
       "post": {
         "operationId": "RequestsController_createRequest",
@@ -1245,20 +1335,29 @@
               "application/json": {
                 "example": {
                   "totalFeedbacks": 3,
-                  "industryAnalytics": {
-                    "industry": {
-                      "id": 1,
-                      "name": "Something",
-                      "description": "some thing some thing"
-                    },
-                    "status": {
-                      "ACCEPTED": 1,
-                      "ALMOST_ACCEPTED": 0,
-                      "UNDECIDED": 1,
-                      "ALMOST_REJECTED": 0,
-                      "REJECTED": 1
-                    },
-                    "feedbacks": []
+                  "industryAnalytics": [
+                    {
+                      "industry": {
+                        "id": 1,
+                        "name": "Something",
+                        "description": "some thing some thing"
+                      },
+                      "status": {
+                        "ACCEPTED": 1,
+                        "ALMOST_ACCEPTED": 0,
+                        "UNDECIDED": 1,
+                        "ALMOST_REJECTED": 0,
+                        "REJECTED": 1
+                      },
+                      "feedbacks": []
+                    }
+                  ],
+                  "total": {
+                    "ACCEPTED": 1,
+                    "ALMOST_ACCEPTED": 0,
+                    "UNDECIDED": 1,
+                    "ALMOST_REJECTED": 0,
+                    "REJECTED": 1
                   }
                 }
               }
@@ -1267,96 +1366,6 @@
         },
         "tags": [
           "admin"
-        ]
-      }
-    },
-    "/chats/{conversationId}": {
-      "get": {
-        "operationId": "ChatsController_getFromConversation",
-        "summary": "Get all messages from a conversation",
-        "parameters": [
-          {
-            "name": "conversationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MessageEntity"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/chats/create/{userId}": {
-      "post": {
-        "operationId": "ChatsController_createConversation",
-        "summary": "Create a conversation with a user",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationEntity"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/chats": {
-      "get": {
-        "operationId": "ChatsController_getAllConversation",
-        "summary": "Get all conversations for current user",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ConversationEntity"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "chats"
         ]
       }
     },
@@ -2091,6 +2100,61 @@
           "id"
         ]
       },
+      "MessageEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "conversationId": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "conversationId",
+          "content",
+          "userId"
+        ]
+      },
+      "ConversationEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "members",
+          "type",
+          "createdAt"
+        ]
+      },
       "CreateRequestDto": {
         "type": "object",
         "properties": {
@@ -2124,13 +2188,23 @@
           },
           "userId": {
             "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PENDING",
+              "REJECTED",
+              "CONSULTATION_REQUIRED"
+            ]
           }
         },
         "required": [
           "title",
           "content",
           "filename",
-          "userId"
+          "userId",
+          "status"
         ]
       },
       "UpdateRequestStatusDto": {
@@ -2142,7 +2216,7 @@
               "APPROVED",
               "PENDING",
               "REJECTED",
-              "CONSULTATION_REQURED"
+              "CONSULTATION_REQUIRED"
             ]
           }
         },
@@ -2207,61 +2281,6 @@
           "address",
           "name",
           "enabled"
-        ]
-      },
-      "MessageEntity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "conversationId": {
-            "type": "number"
-          },
-          "content": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "createdAt",
-          "conversationId",
-          "content",
-          "userId"
-        ]
-      },
-      "ConversationEntity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "members": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "type": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "members",
-          "type",
-          "createdAt"
         ]
       },
       "CreateFeedbackDto": {

@@ -103,9 +103,20 @@ export class AdminService {
 
     const industryAnalytics = Object.values(industryFeedbacks);
 
+		const total = Object.values(industryFeedbacks).reduce((acc, industry) => {
+			Object.entries(industry.status).forEach(([status, count]) => {
+				if (!acc[status]) {
+					acc[status] = 0;
+				}
+				acc[status] += count;
+			});
+			return acc;
+		}, {} as Record<string, number>);
+
     return {
       totalFeedbacks,
       industryAnalytics,
+			total,
     };
 	}
 

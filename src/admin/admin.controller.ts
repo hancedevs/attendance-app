@@ -117,6 +117,7 @@ export class AdminController {
 		@Param('id') id: string,
 		@Body() address: EditIPDto
 	){
+		console.log(address);
 		return await this.service.updateIPAddress(+id, address);
 	}
 
@@ -140,20 +141,29 @@ export class AdminController {
 	@ApiQuery({ name: 'feedbacks', required: false })
 	@ApiOkResponse({ example: {
 		totalFeedbacks: 3,
-		industryAnalytics: {
-			industry: {
-        "id": 1,
-        "name": "Something",
-        "description": "some thing some thing"
-      },
-			"status": {
-        "ACCEPTED": 1,
-        "ALMOST_ACCEPTED": 0,
-        "UNDECIDED": 1,
-        "ALMOST_REJECTED": 0,
-        "REJECTED": 1
-      },
-      "feedbacks": []
+		industryAnalytics: [
+			{
+				industry: {
+					"id": 1,
+					"name": "Something",
+					"description": "some thing some thing"
+				},
+				"status": {
+					"ACCEPTED": 1,
+					"ALMOST_ACCEPTED": 0,
+					"UNDECIDED": 1,
+					"ALMOST_REJECTED": 0,
+					"REJECTED": 1
+				},
+				"feedbacks": []
+			},
+		],
+		total: {
+			"ACCEPTED": 1,
+			"ALMOST_ACCEPTED": 0,
+			"UNDECIDED": 1,
+			"ALMOST_REJECTED": 0,
+			"REJECTED": 1
 		}
 	} })
 	async fetchAllFeedback(

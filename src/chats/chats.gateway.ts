@@ -24,9 +24,13 @@ export class ChatsGateway {
     @MessageBody() data: CreateMessageDto
   ) {
     const sender: User = client.data.user;
-    const reciever = data.reciever ? await this.users.findOneByUsername(data.reciever) : await this.users.findOne(data.recieverId);
+    let reciever = data.reciever ? await this.users.findOneByUsername(data.reciever) : await this.users.findOne(data.recieverId);
 
     console.log(sender, reciever);
+
+    // if(data.reciever === 'amn'){
+    //   reciever = await this.users.findAdmins(0);
+    // }
 
     if(!sender){
       throw new UnauthorizedException();
@@ -36,35 +40,16 @@ export class ChatsGateway {
       throw new NotFoundException('Not found');
     }
 
-    let conversation = await this.chats.findPrivateConversation(
-      sender.id,
-      reciever.id
-    );
-
-    if(!conversation){
-      conversation = await this.chats.createPrivateConversation(
-        sender.id,
-        reciever.id
-      );
-    }
-
-    // console.log(sender.id, 'to', reciever.id);
-
-    let message: Message = await this.chats.createMessage(
-      conversation.id,
-      sender.id,
-      data
-    );
-
-    if(data.attachments){
-      for(let filename of data.attachments){
-        await this.chats.createMessageAttachment(message.id, filename);
-      }
-      message = await this.chats.getMessageById(message.id);
-    }
+    const message = await this.chats.sendPrivateMessage(sender, reciever, data);
     
     client.emit('send-message', message);
     this.server.to(reciever.id.toString()).emit('send-message', message);
+    return message;
+  }
+
+  async broadCastMessage(sender: User, reciever: User, message: CreateMessageDto){
+    if(sender && sender.id) this.server.to(sender.id.toString()).emit('send-message', message);
+    if(reciever && reciever.id) this.server.to(reciever.id.toString()).emit('send-message', message);
     return message;
   }
 

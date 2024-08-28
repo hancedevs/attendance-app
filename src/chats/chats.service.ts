@@ -1,6 +1,6 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
-import { ConversationType, Message } from '@prisma/client';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConversationType, Message, User } from '@prisma/client';
 import { MessageEntity } from './entities/message.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
 
@@ -135,5 +135,36 @@ export class ChatsService {
 				createdAt: 'desc'
 			}
 		});
+	}
+
+	async sendPrivateMessage(sender: User, reciever: User, data: CreateMessageDto){
+    let conversation = await this.findPrivateConversation(
+      sender.id,
+      reciever.id
+    );
+
+    if(!conversation){
+      conversation = await this.createPrivateConversation(
+        sender.id,
+        reciever.id
+      );
+    }
+
+    // console.log(sender.id, 'to', reciever.id);
+
+    let message: Message = await this.createMessage(
+      conversation.id,
+      sender.id,
+      data
+    );
+
+    if(data.attachments){
+      for(let filename of data.attachments){
+        await this.createMessageAttachment(message.id, filename);
+      }
+      message = await this.getMessageById(message.id);
+    }
+
+		return message;
 	}
 }

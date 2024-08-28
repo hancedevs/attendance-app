@@ -14,13 +14,20 @@ import { DailySummary } from './entity/daily-summary.entity';
 import { PeriodSummary } from './entity/period-summary.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { CreateAttachmentDto } from './dto/create-attachment.dto';
+import { EventsGateway } from '@/events/events.gateway';
+import { ChatsGateway } from '@/chats/chats.gateway';
+import { ChatsService } from '@/chats/chats.service';
 
 @ApiTags('attendance')
 @Controller('attendance')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(PaginationInterceptor)
 export class AttendanceController {
-	constructor(private service: AttendanceService){}
+	constructor(
+		private service: AttendanceService,
+		private chats: ChatsService,
+		private chatsEvents: ChatsGateway,
+	){}
 
 	@Get()
   @ApiOperation({ summary: 'All attendances for current user' })
@@ -112,11 +119,29 @@ export class AttendanceController {
 		@Body() attachment: CreateAttachmentDto,
 		@Request() req: { user: User }
 	) {
-		return await this.service.attachment(
+		const attendance = await this.service.attachment(
 			attachment,
 			attachment.filename,
 			req.user.id
 		);
+
+		const admins = await this.service.getAdmins();
+
+		admins.forEach(admin => {
+			try{
+				this.chats.sendPrivateMessage(
+					req.user,
+					admin,
+					{
+						content: (attachment.name + '\n\n' + attachment.text).trim(),
+						attachments: [attachment.filename]
+					}
+				);
+			} catch(err) {
+				console.error(err);
+			}
+		});
+		return attendance;
 	}
 
 	@Post()
