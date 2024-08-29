@@ -39,7 +39,7 @@ export class EventsGateway extends ChatsGateway {
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     const verified = await this.service.verifyClient(client);
-    if(verified){
+    if(verified && client.data.user && typeof client.data.user.id == "number"){
       this.service.addOnline(client.data.user.username);
       this.server.emit('user:online', client.data.user.username);
       client.join(client.data.user.id.toString()); 
