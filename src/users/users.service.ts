@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { comparePass, encryptPass } from '@/auth/helpers/password';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -37,6 +38,10 @@ export class UsersService {
 
   findOneByUsername(username: string) {
     return this.prisma.user.findUnique({ where: { username } });
+  }
+
+  async findAllByRole(role: UserRole){
+    return this.prisma.user.findMany({ where: { role } });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto, needOldPassword = true) {

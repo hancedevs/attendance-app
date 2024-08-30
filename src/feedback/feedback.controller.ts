@@ -6,7 +6,7 @@ import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } fro
 import { BasicCommonCRUDController } from '@/common/basic-crud.controller';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { BasicCRUDDto } from '@/common/basic-crud.dto';
-import { User } from '@prisma/client';
+import { User, UserRole } from '@prisma/client';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
 
@@ -43,7 +43,7 @@ export class FeedbackController
 	override findAll(
 		@Req() req?: { user: User }
 	) {
-		return this.service.findAllBy(req.user.id);
+		return req.user.role == UserRole.MARKETING ? this.service.findAll() : this.service.findAllBy(req.user.id);
 	}
 
 }

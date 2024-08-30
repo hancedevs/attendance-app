@@ -7,9 +7,11 @@ import { ChatsService } from '@/chats/chats.service';
 import { ChatsModule } from '@/chats/chats.module';
 import { EventsController } from './events.controller';
 import { UsersService } from '@/users/users.service';
+import { FeedbackModule } from '@/feedback/feedback.module';
+import { AttendanceModule } from '@/attendance/attendance.module';
 
 @Module({
-  imports: [ChatsModule],
+  imports: [ChatsModule, FeedbackModule, AttendanceModule],
   providers: [EventsGateway, JwtStrategy, EventsService, UsersService, ChatsGateway, ChatsService],
   controllers: [EventsController],
   exports: [EventsService]

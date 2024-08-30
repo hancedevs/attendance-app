@@ -12,6 +12,6 @@ export class SalesGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 		const user = req.user as User;
 
-		return user.role == UserRole.SALES;
+		return user.role == UserRole.SALES || user.role == UserRole.MARKETING;
   }
 }

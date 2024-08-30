@@ -684,96 +684,6 @@
         ]
       }
     },
-    "/chats/{conversationId}": {
-      "get": {
-        "operationId": "ChatsController_getFromConversation",
-        "summary": "Get all messages from a conversation",
-        "parameters": [
-          {
-            "name": "conversationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MessageEntity"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/chats/create/{userId}": {
-      "post": {
-        "operationId": "ChatsController_createConversation",
-        "summary": "Create a conversation with a user",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationEntity"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/chats": {
-      "get": {
-        "operationId": "ChatsController_getAllConversation",
-        "summary": "Get all conversations for current user",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ConversationEntity"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "chats"
-        ]
-      }
-    },
     "/requests": {
       "post": {
         "operationId": "RequestsController_createRequest",
@@ -838,6 +748,66 @@
         ]
       }
     },
+    "/requests/{id}": {
+      "get": {
+        "operationId": "RequestsController_getOne",
+        "summary": "Get one requests",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "requests"
+        ]
+      },
+      "delete": {
+        "operationId": "RequestsController_delete",
+        "summary": "Delete a request",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "requests"
+        ]
+      }
+    },
     "/requests/attachment/{attachmentId}": {
       "get": {
         "operationId": "RequestsController_getAttachment",
@@ -862,37 +832,6 @@
                   "name": "name",
                   "filename": "filename",
                   "text": "content"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "requests"
-        ]
-      }
-    },
-    "/requests/{id}": {
-      "delete": {
-        "operationId": "RequestsController_delete",
-        "summary": "Delete a request",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StaffRequest"
                 }
               }
             }
@@ -1366,6 +1305,96 @@
         },
         "tags": [
           "admin"
+        ]
+      }
+    },
+    "/chats/{conversationId}": {
+      "get": {
+        "operationId": "ChatsController_getFromConversation",
+        "summary": "Get all messages from a conversation",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
+        ]
+      }
+    },
+    "/chats/create/{userId}": {
+      "post": {
+        "operationId": "ChatsController_createConversation",
+        "summary": "Create a conversation with a user",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationEntity"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
+        ]
+      }
+    },
+    "/chats": {
+      "get": {
+        "operationId": "ChatsController_getAllConversation",
+        "summary": "Get all conversations for current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
         ]
       }
     },
@@ -2100,61 +2129,6 @@
           "id"
         ]
       },
-      "MessageEntity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "conversationId": {
-            "type": "number"
-          },
-          "content": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "createdAt",
-          "conversationId",
-          "content",
-          "userId"
-        ]
-      },
-      "ConversationEntity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "members": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "type": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "members",
-          "type",
-          "createdAt"
-        ]
-      },
       "CreateRequestDto": {
         "type": "object",
         "properties": {
@@ -2281,6 +2255,61 @@
           "address",
           "name",
           "enabled"
+        ]
+      },
+      "MessageEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "conversationId": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "conversationId",
+          "content",
+          "userId"
+        ]
+      },
+      "ConversationEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "members",
+          "type",
+          "createdAt"
         ]
       },
       "CreateFeedbackDto": {

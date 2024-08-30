@@ -16,8 +16,15 @@ import { JwtStrategy } from '@/auth/jwt.strategy';
 import { EventsService } from './events.service';
 import { ChatsGateway } from '@/chats/chats.gateway';
 import { ChatsService } from '@/chats/chats.service';
-import { User } from '@prisma/client';
+import { Company, Feedback, User, UserRole } from '@prisma/client';
 import { UsersService } from '@/users/users.service';
+import { CreateMessageDto } from '@/chats/dto/create-message.dto';
+import { FeedbackService } from '@/feedback/feedback.service';
+import { AttendanceService } from '@/attendance/attendance.service';
+
+interface fc extends Feedback {
+  company: Company;
+}
 
 @WebSocketGateway({
   cors: {
@@ -30,6 +37,8 @@ export class EventsGateway extends ChatsGateway {
   server: Server;
 
   constructor(
+    private attendance: AttendanceService,
+    private feedback: FeedbackService,
     private service: EventsService,
     public chats: ChatsService,
     public users: UsersService,
@@ -56,6 +65,41 @@ export class EventsGateway extends ChatsGateway {
     @ConnectedSocket() client: Socket,
   ): Observable<WsResponse<Partial<User>>> {
     return client.data.user;
+  }
+
+  @SubscribeMessage('feedback:broadcast')
+  async broadCastFeedback(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() id: string
+  ) {
+    const feedback: fc = await this.feedback.findOne(+id);
+    const users = await this.users.findAllByRole(UserRole.MARKETING);
+    for(const user of users){
+      this.sendMessage(client, {
+        content: `${feedback.company.name}'s Feedback\nFeedback ID: ${feedback.id}\nFeedback Status: ${feedback.status}${feedback.text ? `\n${feedback.text}` : ''}`,
+        recieverId: user.id
+      });
+    }
+  }
+
+  @SubscribeMessage('attendance:absence')
+  async broadCastAttendanceAttachment(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() id: string
+  ) {
+    const attendance = await this.attendance.findOne(+id);
+    const users = [].concat(
+      await this.attendance.getAdmins()
+    ).concat(
+      await this.users.findAllByRole(UserRole.MANAGEMENT)
+    );
+    for(const user of users){
+      this.sendMessage(client, {
+        content: `${client.data.user.name} is absent today.${attendance.attachment.text ? `\nReasons:\n${attendance.attachment.text}` : ''}`,
+        recieverId: user.id,
+        attachments: [attendance.attachment.filename]
+      });
+    }
   }
 
 }

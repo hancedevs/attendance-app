@@ -32,6 +32,10 @@ export class AttendanceService {
 		}, {});
 	}
 
+	async findOne(id: number){
+		return await this.prisma.attendance.findUnique({ where: { id }, include: {  attachment: true } });
+	}
+
 	mapStatus(attendances: Attendance[]) {
 		let hours = [];
 		let currentPair = [];

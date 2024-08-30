@@ -54,6 +54,15 @@ export class RequestsController {
 		return await this.service.getAllFrom(req.user.id, status as (undefined | StaffRequestStatus), true);
 	}
 
+	@Get(':id')
+	@ApiOperation({ summary: 'Get one requests' })
+	@ApiOkResponse({ type: StaffRequest })
+	async getOne(
+		@Param('id') id: number
+	){
+		return await this.service.getOne(+id);
+	}
+
 	@Get('attachment/:attachmentId')
 	@ApiOperation({ summary: 'Get attachment information' })
 	@ApiParam({ name: 'attachmentId' })

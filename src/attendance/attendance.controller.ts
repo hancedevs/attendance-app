@@ -24,9 +24,7 @@ import { ChatsService } from '@/chats/chats.service';
 @UseInterceptors(PaginationInterceptor)
 export class AttendanceController {
 	constructor(
-		private service: AttendanceService,
-		private chats: ChatsService,
-		private chatsEvents: ChatsGateway,
+		private service: AttendanceService
 	){}
 
 	@Get()
@@ -124,23 +122,6 @@ export class AttendanceController {
 			attachment.filename,
 			req.user.id
 		);
-
-		const admins = await this.service.getAdmins();
-
-		admins.forEach(admin => {
-			try{
-				this.chats.sendPrivateMessage(
-					req.user,
-					admin,
-					{
-						content: (attachment.name + '\n\n' + attachment.text).trim(),
-						attachments: [attachment.filename]
-					}
-				);
-			} catch(err) {
-				console.error(err);
-			}
-		});
 		return attendance;
 	}
 
