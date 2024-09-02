@@ -18,6 +18,7 @@ export class AuthController {
   })
   @ApiOkResponse({ type: AuthResponseDto })
   async login(@Body() loginDto: AuthLoginDto) {
+    console.log(loginDto);
     return this.authService.login(loginDto);
   }
 

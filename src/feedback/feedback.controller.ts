@@ -10,6 +10,10 @@ import { User, UserRole } from '@prisma/client';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
 
+interface UserWithAdminTag extends User {
+  isAdmin: boolean;
+}
+
 @ApiTags('feedback')
 @Controller('feedback')
 @UseGuards(JwtAuthGuard, SalesGuard)
@@ -41,9 +45,9 @@ export class FeedbackController
 	@ApiOkResponse({ type: [CreateFeedbackDto] })
 	@PaginatedRoute()
 	override findAll(
-		@Req() req?: { user: User }
+		@Req() req?: { user: UserWithAdminTag }
 	) {
-		return req.user.role == UserRole.MARKETING ? this.service.findAll() : this.service.findAllBy(req.user.id);
+		return req.user.role == UserRole.MARKETING || req.user.isAdmin ? this.service.findAll() : this.service.findAllBy(req.user.id);
 	}
 
 }

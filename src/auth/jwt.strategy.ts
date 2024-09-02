@@ -25,7 +25,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
-    const {password, ...userInfo} = user;
+    const {password, ...userInfo} : { password: any, [key: string]: any } = user;
+    
+    userInfo.isAdmin = (await this.prisma.admin.findFirst({ where: { userId: id } })) ? true : false;
+    
     return userInfo;
   }
 }
