@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '@/users/users.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
@@ -20,6 +20,7 @@ export class AuthService {
     private prisma: PrismaService,
     private email: EmailService
   ) {}
+  private readonly logger = new Logger(AuthService.name);
 
   async login(authLoginDto: AuthLoginDto){
     const user = await this.users.findOneByUsername(authLoginDto.username);
@@ -29,9 +30,10 @@ export class AuthService {
     }
     const pass = await comparePass(authLoginDto.password, user.password);
     
-    console.log('Passed: ', pass)
-    console.log('User In DB: ', user)
-    console.log('Submitted Data: ', authLoginDto)
+    // console.log('Passed: ', pass)
+    // console.log('User In DB: ', user)
+    // console.log('Submitted Data: ', authLoginDto)
+    this.logger.log('LOGIN AS ' + authLoginDto.username);
 
     if (!pass) {
       throw new UnauthorizedException('Invalid Credentials ');
@@ -39,7 +41,7 @@ export class AuthService {
 
     const payload: JwtPayloadInterface = {
       id: user.id,
-      role: user.role,
+      username: user.username
     };
     const token = this.jwtService.sign(payload);
 
@@ -49,11 +51,12 @@ export class AuthService {
   async register(userDto: CreateUserDto) {
 
     const user = await this.users.create(userDto);
+    this.logger.log('REGISTER NEW ' + userDto.username);
 
-    console.log('===> REGISTER()', {
-      ...user,
-      original_password: userDto.password
-    });
+    // console.log('===> REGISTER()', {
+    //   ...user,
+    //   original_password: userDto.password
+    // });
 
     const { password, ...result } = user;
     return result;

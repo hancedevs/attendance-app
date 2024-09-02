@@ -383,6 +383,14 @@ export class AttendanceService {
 		});
 	}
 
+	async deleteFor(userId: number){
+		return this.prisma.attendance.deleteMany({
+			where: {
+				userId
+			},
+		});
+	}
+
 	async getAdmins(){
 		return (await this.prisma.admin.findMany({
 			include: {

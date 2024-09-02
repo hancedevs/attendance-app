@@ -35,7 +35,6 @@ export class RequestsController {
 				}
 			)).id;
 		}
-		console.log(request);
 		return this.service.create({
 			...request,
 			userId: req.user.id,

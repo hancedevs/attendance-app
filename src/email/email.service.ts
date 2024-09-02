@@ -34,4 +34,6 @@ export class EmailService {
 		}
   }
 
+  async notify(to: string, ){}
+
 }

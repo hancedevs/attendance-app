@@ -6,8 +6,10 @@ import { UsersService } from '@/users/users.service';
 import { RequestsService } from '@/requests/requests.service';
 import { ScheduleService } from '@/schedule/schedule.service';
 import { FeedbackService } from '@/feedback/feedback.service';
+import { ChatsModule } from '@/chats/chats.module';
 
 @Module({
+  imports: [ChatsModule],
   providers: [AdminService, AttendanceService, UsersService, RequestsService, ScheduleService, FeedbackService],
   controllers: [AdminController]
 })

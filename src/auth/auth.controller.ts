@@ -28,7 +28,6 @@ export class AuthController {
   })
   @ApiOkResponse({ type: CreateUserDto })
   async register(@Body() userDto: CreateUserDto) {
-    console.log(userDto);
     return this.authService.register(userDto);
   }
 

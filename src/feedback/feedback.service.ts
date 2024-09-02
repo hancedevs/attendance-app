@@ -2,6 +2,7 @@ import { BasicCommonCRUDService } from '@/common/basic-crud.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class FeedbackService
@@ -60,6 +61,32 @@ export class FeedbackService
           },
         }, 
 			},
+		});
+	}
+
+	// Since feedbacks are useful data
+	// We can't delete feedbacks. But we can
+	// Move them to another user
+	async deleteFor(userId: number){
+		let otherUser = (await this.prisma.user.findFirst({
+			where: {
+				role: UserRole.SALES,
+				OR: [
+					{
+						role: UserRole.MARKETING
+					}
+				]
+			}
+		}))?.id;
+		if(!otherUser) {
+			otherUser = (await this.prisma.admin.findFirst({}))?.id
+		}
+		if(!otherUser) {
+			otherUser = (await this.prisma.user.findFirst())?.id
+		}
+		return await this.prisma.feedback.updateMany({
+			where: { userId },
+			data: { userId: otherUser }
 		});
 	}
 }

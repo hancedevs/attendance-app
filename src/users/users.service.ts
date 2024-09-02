@@ -12,7 +12,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const salt = await bcrypt.genSalt(10);
     createUserDto.password = await bcrypt.hash(createUserDto.password, salt);
-    return this.prisma.user.create({ data: { ...createUserDto } });
+    return this.prisma.user.create({ data: { ...createUserDto, username: createUserDto.username.toLowerCase() } });
   }
 
   findAll(fromId?: number, count?: number){
@@ -37,7 +37,7 @@ export class UsersService {
   }
 
   findOneByUsername(username: string) {
-    return this.prisma.user.findUnique({ where: { username } });
+    return this.prisma.user.findUnique({ where: { username: username.toLowerCase() } });
   }
 
   async findAllByRole(role: UserRole){
@@ -62,9 +62,16 @@ export class UsersService {
       }
       updateUserDto.password = await encryptPass(updateUserDto.password);
     }
+    if(updateUserDto.role){
+      updateUserDto.role = UserRole[updateUserDto.role];
+    }
     return this.prisma.user.update({
       where: { id: id },
       data: { ...updateUserDto },
     });
+  }
+
+  async delete(id: number){
+    return await this.prisma.user.delete({ where: { id } });
   }
 }

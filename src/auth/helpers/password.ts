@@ -5,6 +5,6 @@ export async function encryptPass(pass: string){
 }
 
 export async function comparePass(pass: string, hash: string){
-    console.log('===> COMPARE():', pass, '(TO)', hash);
+    // console.log('===> COMPARE():', pass, '(TO)', hash);
     return await compare(pass, hash.toString());
 }

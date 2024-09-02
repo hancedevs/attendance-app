@@ -30,6 +30,23 @@ export class ChatsService {
 		return await this.prisma.group.findUnique({ where: { id: groupId } });
 	}
 
+	async deletePrivateConversation(id: number){
+		await this.deleteMessagesFromConversation(id);
+		return await this.prisma.conversation.delete({ where: { id } });
+	}
+
+	async deleteMessagesFromConversation(id: number){
+		const messages = await this.getAllMessagesFromConversation(id);
+		for(let message of messages){
+			await this.prisma.messageAttachment.deleteMany({ where: { messageId: message.id } });
+		}
+		return await this.prisma.message.deleteMany({
+			where: {
+				conversationId: id
+			}
+		})
+	}
+
 	async findUserInGroup(groupId: number, userId: number){
 		return await this.prisma.group.findUnique({
 			where: {
@@ -89,15 +106,15 @@ export class ChatsService {
 		});
 	}
 
-	async getAllMessagesFromConversation(conversationId: number, userId: number){
+	async getAllMessagesFromConversation(conversationId: number, userId?: number){
 		return await this.prisma.message.findMany({
 			where: {
 				conversationId,
-				conversation: {
+				conversation: userId ? {
 					members: {
 						has: userId
 					}
-				}
+				} : {}
 			},
 			include: {
 				attachments: true
@@ -108,14 +125,14 @@ export class ChatsService {
 		});
 	}
 
-	async getAllConversationsFor(userId: number){
+	async getAllConversationsFor(userId: number, include = true){
 		return await this.prisma.conversation.findMany({
 			where: {
 				members: {
 					has: userId
 				}
 			},
-			include: {
+			include: include ? {
 				Message: {
 					take: 1,
 					include: {
@@ -130,7 +147,7 @@ export class ChatsService {
 						createdAt: 'desc'
 					}
 				}
-			},
+			} : {},
 			orderBy: {
 				createdAt: 'desc'
 			}

@@ -21,8 +21,6 @@ import { UserRole, User } from '@prisma/client';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventsService } from '@/events/events.service';
-import { toPng } from 'jdenticon';
-import { Response as ResponseType } from 'express';
 import { PaginatedRoute } from '@/pagination/pagination.decorator';
 import { PaginationInterceptor } from '@/pagination/pagination.interceptor';
 
@@ -60,7 +58,7 @@ export class UsersController {
   }
 
   @Patch()
-  @ApiOperation({ summary: 'Change current user info' })
+  @ApiOperation({ summary: 'Change current user info', description: '**Remember that if you change the `role` field you will have to login again.**\n\n```json\n{"role": "MARKETING"}\n```' })
   @ApiBody({ description: 'The fields to change', type: CreateUserDto })
   @ApiCreatedResponse({ description: 'The changed user info', type: CreateUserDto })
   update(@Request() req: { user: User }, @Body() updateUserDto: UpdateUserDto) {
@@ -78,7 +76,7 @@ export class UsersController {
     const userRaw = isID ? await this.usersService.findOne(+username) : await this.usersService.findOneByUsername(username);
 
     if(!userRaw) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User ' + username + ' not found');
     }
     
     const {password, ...user} = userRaw;

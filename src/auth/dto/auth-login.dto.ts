@@ -4,6 +4,7 @@ import { IsEnum, IsLowercase, IsNotEmpty } from 'class-validator';
 export class AuthLoginDto {
   @ApiProperty()
   @IsNotEmpty()
+  @IsLowercase()
   username: string;
 
   /**

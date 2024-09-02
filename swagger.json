@@ -21,6 +21,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "backColor",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -294,6 +302,7 @@
       "patch": {
         "operationId": "UsersController_update",
         "summary": "Change current user info",
+        "description": "**Remember that if you change the `role` field you will have to login again.**\n\n```json\n{\"role\": \"MARKETING\"}\n```",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1213,6 +1222,30 @@
         ]
       }
     },
+    "/admin/user/{id}": {
+      "delete": {
+        "operationId": "AdminController_deleteUser",
+        "summary": "Delete User Account",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/feedback-analytics": {
       "get": {
         "operationId": "AdminController_fetchAllFeedback",
@@ -1356,6 +1389,47 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationEntity"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "chats"
+        ]
+      }
+    },
+    "/chats/send/{receiverId}": {
+      "post": {
+        "operationId": "ChatsController_sendMessgae",
+        "summary": "Send message with HTTP",
+        "parameters": [
+          {
+            "name": "receiverId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -2310,6 +2384,36 @@
           "members",
           "type",
           "createdAt"
+        ]
+      },
+      "CreateMessageDto": {
+        "type": "object",
+        "properties": {
+          "reciever": {
+            "type": "string"
+          },
+          "recieverId": {
+            "type": "number"
+          },
+          "conversationId": {
+            "type": "number"
+          },
+          "groupId": {
+            "type": "number"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "reciever",
+          "recieverId",
+          "conversationId",
+          "groupId",
+          "attachments"
         ]
       },
       "CreateFeedbackDto": {

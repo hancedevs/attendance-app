@@ -6,8 +6,9 @@ import { CreateScheduleDto } from '@/schedule/dto/create-schedule.dto';
 import { ScheduleService } from '@/schedule/schedule.service';
 import { UsersService } from '@/users/users.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Attendance, AttendType, Feedback, FeedbackStatus, Industry, StaffRequestStatus } from '@prisma/client';
+import { Attachment, Attendance, AttendType, Feedback, FeedbackStatus, Industry, StaffRequestStatus } from '@prisma/client';
 import { CreateIPDto, EditIPDto } from './dto/create-ip.dto';
+import { ChatsService } from '@/chats/chats.service';
 
 @Injectable()
 export class AdminService {
@@ -18,12 +19,25 @@ export class AdminService {
 		private requests: RequestsService,
 		private schedules: ScheduleService,
 		private feedbacks: FeedbackService,
+		private chats: ChatsService,
 	) { }
 
-	async getAttachment(id: number){
+	/**
+	 * A method to get only the attachment
+	 * @param {number} id Attachment ID
+	 * @returns {Promise<Attachment>} An attachment
+	 */
+	async getAttachment(id: number): Promise<Attachment> {
 		return await this.attendance.getAttachment(id);
 	}
 
+	/**
+	 * Fetch all attendances of a user
+	 * 
+	 * @param {string} username Username of the user
+	 * @param {string?} startDate All attendances from this date
+	 * @param {string?} endDate All attendances to this date
+	 */
 	async getAttendance(username: string, startDate?: string, endDate?: string) {
 		const user = await this.users.findOneByUsername(username);
 		if (!user) {
@@ -32,6 +46,12 @@ export class AdminService {
 		return await this.attendance.getAll(user.id, startDate, endDate);
 	}
 
+	/**
+	 * Fetch all requests as an admin
+	 * 
+	 * @param {{ status?: StaffRequestStatus, username?: string }} options Optional parameters to filter Requests 
+	 * @returns 
+	 */
 	async getAllRequests({
 		status,
 		username
@@ -60,6 +80,12 @@ export class AdminService {
 			: await this.requests.getAll();
 	}
 
+	/**
+	 * Fetch a singular request.
+	 * 
+	 * @param id The request ID
+	 * @returns 
+	 */
 	async getRequestById(id: number) {
 		return await this.requests.getOne(id);
 	}
@@ -72,6 +98,11 @@ export class AdminService {
 		return await this.schedules.createSchedule(userId, schedule);
 	}
 
+	/**
+	 * Fetch all feedbacks analytics
+	 * @param searchParams Search parameters
+	 * @returns 
+	 */
 	async fetchFeedbackAnalytics(searchParams: {
 		userId: number,
 		industryId: number,
@@ -119,7 +150,7 @@ export class AdminService {
 			total,
     };
 	}
-
+	
 	async getAllIPAddress(){
 		return await this.prisma.iPAddress.findMany();
 	}
@@ -141,6 +172,20 @@ export class AdminService {
 		return await this.prisma.iPAddress.delete({
 			where: { id }
 		});
+	}
+
+	async deleteUser(id: number){
+		const chatConversations = await this.chats.getAllConversationsFor(id, false);
+		for(let conv of chatConversations){
+			await this.chats.deletePrivateConversation(conv.id);
+		}
+		await this.attendance.deleteFor(id);
+		await this.requests.deleteFor(id);
+		// Move the user of feedbacks
+		await this.feedbacks.deleteFor(id);
+		// Delete User
+		await this.users.delete(id);
+		return { success: true };
 	}
 
 }

@@ -131,6 +131,16 @@ export class AdminController {
 		return await this.service.rmIPAddress(+id);
 	}
 
+
+	@Delete('user/:id')
+	@ApiOperation({ summary: 'Delete User Account' })
+	@ApiParam({ name: 'id' })
+	async deleteUser(
+		@Param('id') id: string
+	){
+		return await this.service.deleteUser(+id);
+	}
+
 	@Get('feedback-analytics')
 	@ApiOperation({ summary: 'Fetch feedback with parameters' })
 	@ApiQuery({ name: 'user', required: false })

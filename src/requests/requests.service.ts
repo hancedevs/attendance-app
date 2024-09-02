@@ -78,4 +78,10 @@ export class RequestsService {
 			where: { id, userId }
 		});
 	}
+
+	async deleteFor(userId: number){
+		return await this.prisma.staffRequest.deleteMany({
+			where: { userId }
+		});
+	}
 }

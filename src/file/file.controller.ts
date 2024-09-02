@@ -9,6 +9,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { toPng } from 'jdenticon';
 import { UsersService } from '@/users/users.service';
+import { createHash } from 'crypto';
 
 @ApiTags('file')
 @Controller('file')
@@ -23,7 +24,8 @@ export class FileController {
   async getUserAvatar(
     @Param('username') username: string,
     @Res() res: Response,
-    @Query('size') imageSize: string
+    @Query('size') imageSize: string,
+    @Query('backColor') background: string
   ){
     const isID = !isNaN(+username);
     const userRaw = isID ? await this.usersService.findOne(+username) : await this.usersService.findOneByUsername(username);
@@ -33,8 +35,11 @@ export class FileController {
     }
 
     const size = imageSize ? +imageSize : 200;
+    const backColor = background ? '#' + background : '';
     
-    return res.end(toPng(userRaw.username, size));
+    return res.end(toPng(createHash('sha256').update(userRaw.username+userRaw.email).digest('hex'), size, {
+      backColor
+    }));
   }
 
 
